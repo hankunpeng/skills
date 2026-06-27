@@ -20,6 +20,13 @@ This repository contains the following skills:
   npx skills add hankunpeng/hkp-skills --skill conventional-commits
   ```
 
+### 3. Antigravity CLI Statusline (`antigravity-cli-statusline`)
+* **Description**: Customizes the Antigravity CLI status bar to show folder icons, home-abbreviated current working directory, model name, and 5H/7D token quota usage with live refresh countdown.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/hkp-skills --skill antigravity-cli-statusline
+  ```
+
 ---
 
 ## Installation
