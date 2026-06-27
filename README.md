@@ -6,7 +6,14 @@ A collection of custom AI agent skills for Google Antigravity and the open agent
 
 This repository contains the following skills:
 
-### 1. Conventional Commits (`conventional-commits`)
+### 1. Chinese Copywriting Linter (`chinese-copywriting-linter`)
+* **Description**: Lint and automatically format Chinese copywriting and typesetting in Markdown documents according to the Chinese Copywriting Guidelines.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/hkp-skills --skill chinese-copywriting-linter
+  ```
+
+### 2. Conventional Commits (`conventional-commits`)
 * **Description**: Enforce, validate, lint, and manage Conventional Commits across git repositories. Generates semantic changelogs and installs git hooks.
 * **Installation**:
   ```bash
