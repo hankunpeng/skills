@@ -27,7 +27,15 @@ This repository contains the following skills:
   npx skills add hankunpeng/hkp-skills --skill antigravity-cli-statusline
   ```
 
+### 4. Claude Code Statusline (`claude-code-statusline`)
+* **Description**: Installs a toggleable custom Claude Code status line showing the current working directory, context window usage percentage, and model name.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/hkp-skills --skill claude-code-statusline
+  ```
+
 ---
+
 
 ## Installation
 
