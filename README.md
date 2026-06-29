@@ -1,6 +1,6 @@
 # hkp-skills
 
-A collection of custom AI agent skills for Google Antigravity and the open agent skills ecosystem.
+A collection of custom AI agent skills for improving daily work efficiency.
 
 ## Available Skills
 
