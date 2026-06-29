@@ -67,7 +67,7 @@ fi
 padding_native=$(printf '%*s' "$padding_native_count" "")
 
 # Print Line 1: Native Status Line (Left side in dim grey, ● in green, model and context in default colors)
-printf "\033[90m%s\033[0m%s\033[32m●\033[0m \033[37m%s\033[0m | \033[37m%s%% (%s/%s)\033[0m\n" \
+printf "\033[90m%s\033[0m%s\033[32m●\033[0m \033[37m%s\033[0m \033[32m|\033[0m \033[37m%s%% (%s/%s)\033[0m\n" \
   "$left_native" "$padding_native" "$model_name" "$context_used_pct" "$context_tokens_formatted" "$context_limit_formatted"
 
 
@@ -93,10 +93,10 @@ if [ "$terminal_width" -ge "$min_total_width" ]; then
   padding_custom=$(printf '%*s' "$padding_custom_count" "")
 
   if [ -n "$refresh_text" ]; then
-    printf "📂 \033[34m%s\033[0m%s\033[33m%s ${hours}h ${minutes}m\033[0m | \033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m\n" \
+    printf "📂 \033[34m%s\033[0m%s\033[33m%s ${hours}h ${minutes}m\033[0m \033[32m|\033[0m \033[35m5H: %s%%\033[0m \033[32m|\033[0m \033[36m7D: %s%%\033[0m\n" \
       "$cwd_formatted" "$padding_custom" "$emoji" "$gemini_5h_pct" "$gemini_weekly_pct"
   else
-    printf "📂 \033[34m%s\033[0m%s\033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m\n" \
+    printf "📂 \033[34m%s\033[0m%s\033[35m5H: %s%%\033[0m \033[32m|\033[0m \033[36m7D: %s%%\033[0m\n" \
       "$cwd_formatted" "$padding_custom" "$gemini_5h_pct" "$gemini_weekly_pct"
   fi
 else
@@ -114,10 +114,10 @@ else
   padding=$(printf '%*s' "$padding_count" "")
 
   if [ -n "$refresh_text" ]; then
-    printf "%s\033[33m%s ${hours}h ${minutes}m\033[0m | \033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m\n" \
+    printf "%s\033[33m%s ${hours}h ${minutes}m\033[0m \033[32m|\033[0m \033[35m5H: %s%%\033[0m \033[32m|\033[0m \033[36m7D: %s%%\033[0m\n" \
       "$padding" "$emoji" "$gemini_5h_pct" "$gemini_weekly_pct"
   else
-    printf "%s\033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m\n" \
+    printf "%s\033[35m5H: %s%%\033[0m \033[32m|\033[0m \033[36m7D: %s%%\033[0m\n" \
       "$padding" "$gemini_5h_pct" "$gemini_weekly_pct"
   fi
 fi
