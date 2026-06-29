@@ -9,8 +9,9 @@ This skill allows configuring, installing, or updating the custom status bar con
 
 ## Features
 
-- **Double-line / Single-line Auto Layout**: Automatically fits path and quotas into a single line if terminal width permits, otherwise falls back to a clean double-line layout.
-- **Home Directory Abbreviation**: Replaces the home directory path (`/Users/YOUR_USER`) with `~` for cleaner workspace paths.
+- **Preserve Native Status Line (Line 1)**: Renders the default CLI status line on the first line (agent state, active model, and context window token usage) with perfect alignment.
+- **Custom Telemetry Additions (Line 2)**: Displays custom metrics below the native status line: folder icon, home-abbreviated current working directory, 5H/7D token quota usage, and live refresh countdown.
+- **Double-line / Single-line Auto Layout**: For custom telemetry additions (Line 2), automatically fits path and quotas into a single line if terminal width permits, otherwise wraps custom additions to a clean secondary line.
 - **Directory Emoji**: Prepend `📂` to the leftmost side of the path.
 - **Token Quota Display**: Displays 5H (5-hour) and 7D (weekly) remaining fraction percentages.
 - **Live Refresh Countdown**: Displays `⏳ Xh Ym` (if >= 1h) or `⌛ 0h Ym` (if < 1h) for the 5-hour quota reset time.

@@ -2,10 +2,11 @@
 # 读取标准输入的 JSON 数据
 read -r JSON_INPUT
 
-# 使用 jq 解析当前工作目录、模型名称和终端宽度
+# 使用 jq 解析当前工作目录、模型名称、终端宽度、agent_state 等
 cwd_full=$(echo "$JSON_INPUT" | jq -r '.cwd // ""')
 model_name=$(echo "$JSON_INPUT" | jq -r '.model.display_name // "Gemini"')
 terminal_width=$(echo "$JSON_INPUT" | jq -r '.terminal_width // 80')
+agent_state=$(echo "$JSON_INPUT" | jq -r '.agent_state // "idle"')
 
 # 使用 jq 计算 5H 和 7D 的剩余百分比并取整
 gemini_5h_pct=$(echo "$JSON_INPUT" | jq -r '.quota["gemini-5h"].remaining_fraction // 1 | . * 100 | round')
@@ -41,60 +42,82 @@ if [ -z "$home_dir" ]; then
 fi
 cwd_formatted=$(echo "$cwd_full" | sed "s|^$home_dir|~|")
 
-# 第二行（右侧部分）的可见文本与总长度
-right_text="${refresh_text}5H: ${gemini_5h_pct}% | 7D: ${gemini_weekly_pct}% | ● ${model_name}"
-visible_len=${#right_text}
-
-# 计算宽度阈值
-# 左侧显示宽度：📂 (占2列) + 空格 (占1列) + 路径长度
-left_width=$(( ${#cwd_formatted} + 3 ))
-
-# 右侧显示宽度：有 emoji 时需在字符数基础上加 1
-if [ -n "$refresh_text" ]; then
-  right_width=$(( visible_len + 1 ))
+# --- Line 1: Native Status Line ---
+# Left native text: show agent state or shortcut hint
+if [ "$agent_state" = "idle" ] || [ -z "$agent_state" ]; then
+  left_native="? for shortcuts"
 else
-  right_width=$(( visible_len ))
+  left_native="${agent_state}..."
+fi
+left_native_len=${#left_native}
+
+# Right native text elements: model and context window
+context_used_pct=$(echo "$JSON_INPUT" | jq -r '.context_window.used_percentage // 0 | . * 10 | round / 10')
+context_tokens_formatted=$(echo "$JSON_INPUT" | jq -r 'if .context_window then (if (.context_window.total_input_tokens // 0) >= 1000000 then "\((.context_window.total_input_tokens/1000000 | round))M" else "\((.context_window.total_input_tokens/1000 | round))k" end) else "0k" end')
+context_limit_formatted=$(echo "$JSON_INPUT" | jq -r 'if .context_window then (if (.context_window.context_window_size // 0) >= 1000000 then "\((.context_window.context_window_size/1000000 | round))M" else "\((.context_window.context_window_size/1000 | round))k" end) else "0k" end')
+
+right_native="● ${model_name} | ${context_used_pct}% (${context_tokens_formatted}/${context_limit_formatted})"
+right_native_len=${#right_native}
+
+# Calculate padding for Line 1
+padding_native_count=$(( terminal_width - left_native_len - right_native_len - 1 ))
+if [ "$padding_native_count" -lt 1 ]; then
+  padding_native_count=1
+fi
+padding_native=$(printf '%*s' "$padding_native_count" "")
+
+# Print Line 1: Native Status Line (Left side in dim grey, ● in green, model and context in default colors)
+printf "\033[90m%s\033[0m%s\033[32m●\033[0m \033[37m%s\033[0m | \033[37m%s%% (%s/%s)\033[0m\n" \
+  "$left_native" "$padding_native" "$model_name" "$context_used_pct" "$context_tokens_formatted" "$context_limit_formatted"
+
+
+# --- Line 2: Custom Status Line Additions ---
+# Left custom text
+left_custom="📂 ${cwd_formatted}"
+left_custom_width=$(( ${#cwd_formatted} + 3 ))
+
+# Right custom text
+if [ -n "$refresh_text" ]; then
+  right_custom="${refresh_text}5H: ${gemini_5h_pct}% | 7D: ${gemini_weekly_pct}%"
+  right_custom_width=$(( ${#right_custom} + 1 )) # add 1 to compensate for emoji width
+else
+  right_custom="5H: ${gemini_5h_pct}% | 7D: ${gemini_weekly_pct}%"
+  right_custom_width=${#right_custom}
 fi
 
-# 单行显示所需的最小宽度（左侧 + 最小间隔 4 个空格 + 右侧 + 1个右侧安全边距）
-min_total_width=$(( left_width + 4 + right_width + 1 ))
+min_total_width=$(( left_custom_width + 4 + right_custom_width + 1 ))
 
 if [ "$terminal_width" -ge "$min_total_width" ]; then
-  # 宽度足够：单行显示
-  # 计算中间填充的空格数（保留 1 个空格的右侧安全边距）
-  padding_count=$(( terminal_width - left_width - right_width - 1 ))
-  padding=$(printf '%*s' "$padding_count" "")
+  # Width sufficient: Print left and right side on Line 2
+  padding_custom_count=$(( terminal_width - left_custom_width - right_custom_width - 1 ))
+  padding_custom=$(printf '%*s' "$padding_custom_count" "")
 
-  # 输出单行状态栏
   if [ -n "$refresh_text" ]; then
-    printf "📂 \033[34m%s\033[0m%s\033[33m%s ${hours}h ${minutes}m\033[0m | \033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m | \033[32m● %s\033[0m\n" \
-      "$cwd_formatted" "$padding" "$emoji" "$gemini_5h_pct" "$gemini_weekly_pct" "$model_name"
+    printf "📂 \033[34m%s\033[0m%s\033[33m%s ${hours}h ${minutes}m\033[0m | \033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m\n" \
+      "$cwd_formatted" "$padding_custom" "$emoji" "$gemini_5h_pct" "$gemini_weekly_pct"
   else
-    printf "📂 \033[34m%s\033[0m%s\033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m | \033[32m● %s\033[0m\n" \
-      "$cwd_formatted" "$padding" "$gemini_5h_pct" "$gemini_weekly_pct" "$model_name"
+    printf "📂 \033[34m%s\033[0m%s\033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m\n" \
+      "$cwd_formatted" "$padding_custom" "$gemini_5h_pct" "$gemini_weekly_pct"
   fi
 else
-  # 宽度不足：分两行显示
-  # 第一行：左对齐显示带有 📂 的蓝色缩写当前目录的路径
+  # Width insufficient: Print CWD on Line 2, and Quotas on Line 3
   printf "📂 \033[34m%s\033[0m\n" "$cwd_formatted"
 
-  # 计算第二行右对齐所需填充 of 的空格数
   if [ -n "$refresh_text" ]; then
-    padding_count=$(( terminal_width - visible_len - 2 ))
+    padding_count=$(( terminal_width - ${#right_custom} - 2 ))
   else
-    padding_count=$(( terminal_width - visible_len - 1 ))
+    padding_count=$(( terminal_width - ${#right_custom} - 1 ))
   fi
   if [ "$padding_count" -lt 0 ]; then
     padding_count=0
   fi
   padding=$(printf '%*s' "$padding_count" "")
 
-  # 输出第二行
   if [ -n "$refresh_text" ]; then
-    printf "%s\033[33m%s ${hours}h ${minutes}m\033[0m | \033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m | \033[32m● %s\033[0m\n" \
-      "$padding" "$emoji" "$gemini_5h_pct" "$gemini_weekly_pct" "$model_name"
+    printf "%s\033[33m%s ${hours}h ${minutes}m\033[0m | \033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m\n" \
+      "$padding" "$emoji" "$gemini_5h_pct" "$gemini_weekly_pct"
   else
-    printf "%s\033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m | \033[32m● %s\033[0m\n" \
-      "$padding" "$gemini_5h_pct" "$gemini_weekly_pct" "$model_name"
+    printf "%s\033[35m5H: %s%%\033[0m | \033[36m7D: %s%%\033[0m\n" \
+      "$padding" "$gemini_5h_pct" "$gemini_weekly_pct"
   fi
 fi
