@@ -43,6 +43,13 @@ Or install a specific skill by specifying its name:
 npx skills add hankunpeng/hkp-skills --skill <skill-name>
 ```
 
+Or install multiple specific skills:
+
+```bash
+npx skills add hankunpeng/hkp-skills --skill <skill-name-1> --skill <skill-name-2>
+```
+
+
 ## License
 
 This repository is licensed under the [MIT License](LICENSE).
