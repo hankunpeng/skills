@@ -37,6 +37,13 @@ You can install all skills in this repository:
 npx skills add hankunpeng/hkp-skills
 ```
 
+Or install all skills globally:
+
+```bash
+npx skills add hankunpeng/hkp-skills -g --all
+```
+
+
 Or install a specific skill by specifying its name:
 
 ```bash
