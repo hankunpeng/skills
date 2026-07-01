@@ -97,6 +97,8 @@ class BaseSchemaValidator:
         self.verbose = verbose
 
         self.schemas_dir = Path(__file__).parent.parent / "schemas"
+        self._xml_roots = {}
+        self._schemas_cache = {}
 
         patterns = ["*.xml", "*.rels"]
         self.xml_files = [
@@ -106,11 +108,33 @@ class BaseSchemaValidator:
         if not self.xml_files:
             print(f"Warning: No XML files found in {self.unpacked_dir}")
 
+    def get_xml_root(self, xml_file):
+        path_str = str(Path(xml_file).resolve())
+        if path_str not in self._xml_roots:
+            self._xml_roots[path_str] = lxml.etree.parse(path_str).getroot()
+        return self._xml_roots[path_str]
+
+    def clear_xml_cache(self):
+        self._xml_roots = {}
+
+    def _get_schema(self, schema_path):
+        path_str = str(schema_path)
+        if path_str not in self._schemas_cache:
+            with open(schema_path, "rb") as xsd_file:
+                parser = lxml.etree.XMLParser()
+                xsd_doc = lxml.etree.parse(
+                    xsd_file, parser=parser, base_url=path_str
+                )
+                self._schemas_cache[path_str] = lxml.etree.XMLSchema(xsd_doc)
+        return self._schemas_cache[path_str]
+
     def validate(self):
         raise NotImplementedError("Subclasses must implement the validate method")
 
     def repair(self) -> int:
-        return self.repair_whitespace_preservation()
+        repairs = self.repair_whitespace_preservation()
+        self.clear_xml_cache()
+        return repairs
 
     def repair_whitespace_preservation(self) -> int:
         repairs = 0
@@ -146,7 +170,7 @@ class BaseSchemaValidator:
 
         for xml_file in self.xml_files:
             try:
-                lxml.etree.parse(str(xml_file))
+                self.get_xml_root(xml_file)
             except lxml.etree.XMLSyntaxError as e:
                 errors.append(
                     f"  {xml_file.relative_to(self.unpacked_dir)}: "
@@ -173,7 +197,7 @@ class BaseSchemaValidator:
 
         for xml_file in self.xml_files:
             try:
-                root = lxml.etree.parse(str(xml_file)).getroot()
+                root = self.get_xml_root(xml_file)
                 declared = set(root.nsmap.keys()) - {None}  
 
                 for attr_val in [
@@ -203,7 +227,8 @@ class BaseSchemaValidator:
 
         for xml_file in self.xml_files:
             try:
-                root = lxml.etree.parse(str(xml_file)).getroot()
+                import copy
+                root = copy.deepcopy(self.get_xml_root(xml_file))
                 file_ids = {}  
 
                 mc_elements = root.xpath(
@@ -315,7 +340,7 @@ class BaseSchemaValidator:
 
         for rels_file in rels_files:
             try:
-                rels_root = lxml.etree.parse(str(rels_file)).getroot()
+                rels_root = self.get_xml_root(rels_file)
 
                 rels_dir = rels_file.parent
 
@@ -399,7 +424,7 @@ class BaseSchemaValidator:
                 continue
 
             try:
-                rels_root = lxml.etree.parse(str(rels_file)).getroot()
+                rels_root = self.get_xml_root(rels_file)
                 rid_to_type = {}
 
                 for rel in rels_root.findall(
@@ -419,7 +444,7 @@ class BaseSchemaValidator:
                         )
                         rid_to_type[rid] = type_name
 
-                xml_root = lxml.etree.parse(str(xml_file)).getroot()
+                xml_root = self.get_xml_root(xml_file)
 
                 r_ns = self.OFFICE_RELATIONSHIPS_NAMESPACE
                 rid_attrs_to_check = ["id", "embed", "link"]
@@ -499,7 +524,7 @@ class BaseSchemaValidator:
             return False
 
         try:
-            root = lxml.etree.parse(str(content_types_file)).getroot()
+            root = self.get_xml_root(content_types_file)
             declared_parts = set()
             declared_extensions = set()
 
@@ -554,7 +579,7 @@ class BaseSchemaValidator:
                     continue
 
                 try:
-                    root_tag = lxml.etree.parse(str(xml_file)).getroot().tag
+                    root_tag = self.get_xml_root(xml_file).tag
                     root_name = root_tag.split("}")[-1] if "}" in root_tag else root_tag
 
                     if root_name in declarable_roots and path_str not in declared_parts:
@@ -754,15 +779,10 @@ class BaseSchemaValidator:
             return None, None  
 
         try:
-            with open(schema_path, "rb") as xsd_file:
-                parser = lxml.etree.XMLParser()
-                xsd_doc = lxml.etree.parse(
-                    xsd_file, parser=parser, base_url=str(schema_path)
-                )
-                schema = lxml.etree.XMLSchema(xsd_doc)
+            schema = self._get_schema(schema_path)
 
-            with open(xml_file, "r") as f:
-                xml_doc = lxml.etree.parse(f)
+            import copy
+            xml_doc = lxml.etree.ElementTree(copy.deepcopy(self.get_xml_root(xml_file)))
 
             xml_doc, _ = self._remove_template_tags_from_text_nodes(xml_doc)
             xml_doc = self._preprocess_for_mc_ignorable(xml_doc)

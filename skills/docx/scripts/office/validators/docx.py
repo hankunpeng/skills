@@ -71,7 +71,7 @@ class DOCXSchemaValidator(BaseSchemaValidator):
                 continue
 
             try:
-                root = lxml.etree.parse(str(xml_file)).getroot()
+                root = self.get_xml_root(xml_file)
 
                 for elem in root.iter(f"{{{self.WORD_2006_NAMESPACE}}}t"):
                     if elem.text:
@@ -117,7 +117,7 @@ class DOCXSchemaValidator(BaseSchemaValidator):
                 continue
 
             try:
-                root = lxml.etree.parse(str(xml_file)).getroot()
+                root = self.get_xml_root(xml_file)
                 namespaces = {"w": self.WORD_2006_NAMESPACE}
 
                 for t_elem in root.xpath(".//w:del//w:t", namespaces=namespaces):
@@ -168,7 +168,7 @@ class DOCXSchemaValidator(BaseSchemaValidator):
                 continue
 
             try:
-                root = lxml.etree.parse(str(xml_file)).getroot()
+                root = self.get_xml_root(xml_file)
                 paragraphs = root.findall(f".//{{{self.WORD_2006_NAMESPACE}}}p")
                 count = len(paragraphs)
             except Exception as e:
@@ -207,7 +207,7 @@ class DOCXSchemaValidator(BaseSchemaValidator):
                 continue
 
             try:
-                root = lxml.etree.parse(str(xml_file)).getroot()
+                root = self.get_xml_root(xml_file)
                 namespaces = {"w": self.WORD_2006_NAMESPACE}
 
                 invalid_elements = root.xpath(
@@ -258,7 +258,7 @@ class DOCXSchemaValidator(BaseSchemaValidator):
 
         for xml_file in self.xml_files:
             try:
-                for elem in lxml.etree.parse(str(xml_file)).iter():
+                for elem in self.get_xml_root(xml_file).iter():
                     if val := elem.get(para_id_attr):
                         if self._parse_id_value(val, base=16) >= 0x80000000:
                             errors.append(
@@ -312,7 +312,7 @@ class DOCXSchemaValidator(BaseSchemaValidator):
             return True
 
         try:
-            doc_root = lxml.etree.parse(str(document_xml)).getroot()
+            doc_root = self.get_xml_root(document_xml)
             namespaces = {"w": self.WORD_2006_NAMESPACE}
 
             range_starts = {
@@ -352,7 +352,7 @@ class DOCXSchemaValidator(BaseSchemaValidator):
 
             comment_ids = set()
             if comments_xml and comments_xml.exists():
-                comments_root = lxml.etree.parse(str(comments_xml)).getroot()
+                comments_root = self.get_xml_root(comments_xml)
                 comment_ids = {
                     elem.get(f"{{{self.WORD_2006_NAMESPACE}}}id")
                     for elem in comments_root.xpath(
@@ -386,6 +386,7 @@ class DOCXSchemaValidator(BaseSchemaValidator):
     def repair(self) -> int:
         repairs = super().repair()
         repairs += self.repair_durableId()
+        self.clear_xml_cache()
         return repairs
 
     def repair_durableId(self) -> int:
