@@ -31,10 +31,10 @@ Posts text and images to X (Twitter) via Chrome Computer Use Mode.
 This skill follows a **Hybrid Execution Model**:
 
 1. **API First (Recommended for text posts)**: Attempt to post the tweet using the official X API script (`x-api.ts`). This is fast, stable, and uses no browser resources.
-2. **Browser Fallback**: If the API call fails (e.g., monthly 1500-tweet Free tier quota exceeded, rate limit) or API credentials are not configured in `~/.config/hkp-skills/twitter.yaml`, fall back automatically to **Chrome Computer Use Mode** / **CLI Bridge** to simulate browser actions.
+2. **Browser Fallback**: If the API call fails (e.g., monthly 1500-tweet Free tier quota exceeded, rate limit) or API credentials are not configured in `~/.config/skills/twitter.yaml`, fall back automatically to **Chrome Computer Use Mode** / **CLI Bridge** to simulate browser actions.
 
 ### Prerequisites
-- **For API Mode**: Configure your X API credentials and state in your global `~/.config/hkp-skills/twitter.yaml` file:
+- **For API Mode**: Configure your X API credentials and state in your global `~/.config/skills/twitter.yaml` file:
   ```yaml
   x_api:
     api_key: "YOUR_API_KEY"
@@ -54,12 +54,12 @@ This skill follows a **Hybrid Execution Model**:
      - **App permissions**: Select **Read and write**.
      - **Type of App**: Select **Web App, Automated App or Bot**.
      - **Callback URI / Redirect URL**: Enter `https://127.0.0.1` (required placeholder).
-     - **Website URL**: Enter your project URL, e.g. `https://github.com/hankunpeng/hkp-skills` (required placeholder).
+     - **Website URL**: Enter your project URL, e.g. `https://github.com/hankunpeng/skills` (required placeholder).
      - Save the settings.
   4. Go to the **Keys and Tokens** tab:
      - Under **Consumer Keys**, copy or regenerate the **API Key** and **API Key Secret**.
      - Under **Access Token and Secret**, click **Regenerate** to obtain the **Access Token** and **Access Token Secret** (Note: tokens must be regenerated after changing permissions to activate write access).
-  5. Copy these 4 credentials and paste them into `~/.config/hkp-skills/twitter.yaml`.
+  5. Copy these 4 credentials and paste them into `~/.config/skills/twitter.yaml`.
 
 - **For Browser Fallback**: Google Chrome installed, logged into X (Twitter) in Chrome, and macOS accessibility permissions granted if required.
 

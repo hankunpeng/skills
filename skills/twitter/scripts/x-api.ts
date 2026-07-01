@@ -114,7 +114,7 @@ interface TwitterConfig {
 }
 
 function getTwitterYamlPath(): string {
-  return path.join(os.homedir(), '.config', 'hkp-skills', 'twitter.yaml');
+  return path.join(os.homedir(), '.config', 'skills', 'twitter.yaml');
 }
 
 function serializeToYaml(obj: any): string {

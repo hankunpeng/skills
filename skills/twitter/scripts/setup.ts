@@ -3,10 +3,10 @@ import path from 'node:path';
 import os from 'node:os';
 
 function setup() {
-  const configDir = path.join(os.homedir(), '.config', 'hkp-skills');
+  const configDir = path.join(os.homedir(), '.config', 'skills');
   const configPath = path.join(configDir, 'twitter.yaml');
 
-  console.log(`Setting up hkp-skills twitter configuration...`);
+  console.log(`Setting up skills twitter configuration...`);
 
   // 1. Create directory if not exists
   if (!fs.existsSync(configDir)) {
@@ -18,7 +18,7 @@ function setup() {
   if (!fs.existsSync(configPath)) {
     console.log(`Creating template configuration: ${configPath}`);
     const currentMonth = new Date().toISOString().substring(0, 7); // "YYYY-MM"
-    const template = `# Twitter API credentials and state configuration for hkp-skills
+    const template = `# Twitter API credentials and state configuration for skills
 
 x_api:
   api_key: "YOUR_CONSUMER_API_KEY_HERE"
