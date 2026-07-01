@@ -25,13 +25,57 @@ def main():
     parser = argparse.ArgumentParser(
         description="Parse documents to Markdown or JSON using LlamaParse API."
     )
-    parser.add_argument("input_file", help="Path to the document to parse (PDF, DOCX, PPTX, XLSX, PNG, etc.)")
-    parser.add_argument("-o", "--output", help="Path to output file. If omitted, writes to stdout (or <filename>.md/json if a directory is specified)")
-    parser.add_argument("-t", "--type", choices=["markdown", "text"], default="markdown", help="Result type (default: markdown)")
-    parser.add_argument("-i", "--instruction", help="Custom parsing instruction (prompt) to guide the parser")
-    parser.add_argument("-l", "--language", help="Language code (e.g., 'en', 'ch_sim' for simplified Chinese)")
-    parser.add_argument("-j", "--json", action="store_true", help="Output raw JSON results instead of text")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose logs from LlamaParse")
+    parser.add_argument(
+        "input_files", 
+        nargs="+", 
+        help="One or more paths to the documents to parse (PDF, DOCX, PPTX, XLSX, PNG, etc.)"
+    )
+    parser.add_argument(
+        "-o", "--output", 
+        help="Path to output file or directory. If a directory is specified, outputs are written there with matching basenames."
+    )
+    parser.add_argument(
+        "-k", "--api-key", 
+        help="LlamaCloud API key. If omitted, reads LLAMA_CLOUD_API_KEY environment variable."
+    )
+    parser.add_argument(
+        "-t", "--type", 
+        choices=["markdown", "text"], 
+        default="markdown", 
+        help="Result type (default: markdown)"
+    )
+    parser.add_argument(
+        "-i", "--instruction", 
+        help="Custom parsing instruction (prompt) to guide the parser"
+    )
+    parser.add_argument(
+        "-l", "--language", 
+        help="Language code (e.g., 'en', 'ch_sim' for simplified Chinese)"
+    )
+    parser.add_argument(
+        "-p", "--pages", 
+        help="Target pages to parse (comma-separated page numbers/ranges, e.g., '0,2-5')."
+    )
+    parser.add_argument(
+        "-j", "--json", 
+        action="store_true", 
+        help="Output raw JSON results instead of text"
+    )
+    parser.add_argument(
+        "--use-vendor-model", 
+        action="store_true", 
+        help="Enable vendor multimodal model parsing for complex layout and images"
+    )
+    parser.add_argument(
+        "--vendor-model-name", 
+        default="gpt-4o", 
+        help="Name of the vendor multimodal model to use (default: gpt-4o)"
+    )
+    parser.add_argument(
+        "-v", "--verbose", 
+        action="store_true", 
+        help="Print verbose logs from LlamaParse"
+    )
     
     args = parser.parse_args()
     
@@ -39,17 +83,17 @@ def main():
     check_dependencies()
     
     # 2. Check API Key
-    api_key = os.environ.get("LLAMA_CLOUD_API_KEY")
+    api_key = args.api_key or os.environ.get("LLAMA_CLOUD_API_KEY")
     if not api_key:
-        print("Error: LLAMA_CLOUD_API_KEY environment variable is not set.", file=sys.stderr)
-        print("Please obtain an API key from https://cloud.llamaindex.ai/ and set it:", file=sys.stderr)
-        print("  export LLAMA_CLOUD_API_KEY=\"your_key_here\"", file=sys.stderr)
+        print("Error: LLAMA_CLOUD_API_KEY is not set and no --api-key flag was provided.", file=sys.stderr)
+        print("Please obtain an API key from https://cloud.llamaindex.ai/ and configure it.", file=sys.stderr)
         sys.exit(1)
         
-    # Check if input file exists
-    if not os.path.exists(args.input_file):
-        print(f"Error: Input file '{args.input_file}' does not exist.", file=sys.stderr)
-        sys.exit(1)
+    # Check if input files exist
+    for f in args.input_files:
+        if not os.path.exists(f):
+            print(f"Error: Input file '{f}' does not exist.", file=sys.stderr)
+            sys.exit(1)
         
     from llama_parse import LlamaParse
     
@@ -66,28 +110,57 @@ def main():
         result_type=args.type,
         parsing_instruction=args.instruction,
         language=args.language,
+        target_pages=args.pages,
+        use_vendor_multimodal_model=args.use_vendor_model,
+        vendor_multimodal_model_name=args.vendor_model_name if args.use_vendor_model else None,
         verbose=args.verbose
     )
     
     try:
-        if args.json:
+        results = []
+        for input_file in args.input_files:
             if args.verbose:
-                print("Parsing and fetching JSON result...", file=sys.stderr)
-            json_result = llama_parser.get_json_result(args.input_file)
-            output_content = json.dumps(json_result, indent=2, ensure_ascii=False)
-        else:
-            if args.verbose:
-                print("Parsing and fetching document result...", file=sys.stderr)
-            documents = llama_parser.load_data(args.input_file)
-            output_content = "\n\n".join([doc.text for doc in documents])
+                print(f"Parsing '{input_file}'...", file=sys.stderr)
             
-        # 4. Output the result
+            if args.json:
+                json_result = llama_parser.get_json_result(input_file)
+                output_content = json.dumps(json_result, indent=2, ensure_ascii=False)
+            else:
+                documents = llama_parser.load_data(input_file)
+                output_content = "\n\n".join([doc.text for doc in documents])
+                
+            results.append((input_file, output_content))
+            
+        # 4. Handle Output
         if args.output:
-            with open(args.output, "w", encoding="utf-8") as f:
-                f.write(output_content)
-            print(f"Successfully saved parsed content to: {args.output}", file=sys.stderr)
+            if os.path.isdir(args.output):
+                for input_file, content in results:
+                    base = os.path.splitext(os.path.basename(input_file))[0]
+                    ext = ".json" if args.json else ".md"
+                    out_path = os.path.join(args.output, base + ext)
+                    with open(out_path, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    print(f"Successfully saved parsed content to: {out_path}", file=sys.stderr)
+            else:
+                # If single output file and multiple inputs, concatenate them
+                concatenated = ""
+                for idx, (input_file, content) in enumerate(results):
+                    if len(results) > 1:
+                        concatenated += f"<!-- START OF FILE: {input_file} -->\n"
+                    concatenated += content
+                    if len(results) > 1:
+                        concatenated += f"\n<!-- END OF FILE: {input_file} -->\n\n"
+                
+                with open(args.output, "w", encoding="utf-8") as f:
+                    f.write(concatenated)
+                print(f"Successfully saved parsed content to: {args.output}", file=sys.stderr)
         else:
-            print(output_content)
+            for idx, (input_file, content) in enumerate(results):
+                if len(results) > 1:
+                    print(f"--- File: {input_file} ---", file=sys.stderr)
+                print(content)
+                if len(results) > 1 and idx < len(results) - 1:
+                    print("\n" + "="*40 + "\n", file=sys.stderr)
             
     except Exception as e:
         print(f"Error occurred during parsing: {e}", file=sys.stderr)
