@@ -129,4 +129,5 @@ json_results = parser.get_json_result("./my_document.pdf")
 ## User Communication
 - Always check if `LLAMA_CLOUD_API_KEY` is configured (or if the `-k` argument is passed) before running.
 - Report parsing completion details (e.g., number of pages, output format, output file path).
+- Show the LlamaParse Free Plan Usage (credits used and remaining) automatically reported by the script.
 - Show a brief preview of the parsed content to the user.

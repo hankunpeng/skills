@@ -8,6 +8,8 @@ import os
 import sys
 import argparse
 import json
+import urllib.request
+import urllib.error
 
 def check_dependencies():
     missing = []
@@ -20,6 +22,38 @@ def check_dependencies():
         print(f"Error: Missing dependencies: {', '.join(missing)}", file=sys.stderr)
         print("Please install them using: pip install llama-parse", file=sys.stderr)
         sys.exit(1)
+
+def print_free_plan_usage(api_key):
+    try:
+        # 1. Get organization ID
+        orgs_req = urllib.request.Request(
+            "https://api.cloud.llamaindex.ai/api/v1/organizations",
+            headers={"Authorization": f"Bearer {api_key}"}
+        )
+        with urllib.request.urlopen(orgs_req) as response:
+            orgs = json.loads(response.read().decode())
+            if not orgs:
+                return
+            org_id = orgs[0]["id"]
+            
+        # 2. Get usage details
+        usage_req = urllib.request.Request(
+            f"https://api.cloud.llamaindex.ai/api/v1/organizations/{org_id}/usage",
+            headers={"Authorization": f"Bearer {api_key}"}
+        )
+        with urllib.request.urlopen(usage_req) as response:
+            usage_data = json.loads(response.read().decode())
+            
+        # 3. Extract and display
+        free_credits = usage_data.get("usage", {}).get("active_free_credits_usage", [])
+        if free_credits:
+            start = free_credits[0].get("starting_balance", 0)
+            remain = free_credits[0].get("remaining_balance", 0)
+            used = start - remain
+            print(f"\n[LlamaParse Free Plan Usage]: Used {used} / {start} credits ({remain} remaining).", file=sys.stderr)
+    except Exception:
+        # Gracefully ignore if we cannot fetch billing info
+        pass
 
 def main():
     parser = argparse.ArgumentParser(
@@ -130,6 +164,9 @@ def main():
                 output_content = "\n\n".join([doc.text for doc in documents])
                 
             results.append((input_file, output_content))
+            
+            # Show Free plan usage after each file is parsed
+            print_free_plan_usage(api_key)
             
         # 4. Handle Output
         if args.output:
