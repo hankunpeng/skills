@@ -10,6 +10,10 @@ import argparse
 import json
 import urllib.request
 import urllib.error
+import warnings
+
+# Suppress LlamaParse deprecation warning to keep console output clean
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def check_dependencies():
     missing = []
