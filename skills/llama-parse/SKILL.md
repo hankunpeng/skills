@@ -92,6 +92,13 @@ Specify the document language for better OCR/parsing accuracy (e.g., `en` for En
 python3 <skill_dir>/scripts/parse.py path/to/chinese_doc.pdf -l ch_sim
 ```
 
+### 9. Querying Account Usage/Quota
+To query your LlamaParse Free Plan credit usage directly without parsing files:
+```bash
+python3 <skill_dir>/scripts/parse.py --show-usage
+```
+
+
 ## Python API Quick Reference
 
 You can also import and use LlamaParse directly inside Python:
@@ -127,7 +134,7 @@ json_results = parser.get_json_result("./my_document.pdf")
 - **Empty Output**: Ensure the file type is supported. Supported file types include `.pdf`, `.docx`, `.pptx`, `.xlsx`, `.png`, `.jpg`, `.jpeg`, `.tiff`.
 
 ## User Communication
-- Always check if `LLAMA_CLOUD_API_KEY` is configured (or if the `-k` argument is passed) before running.
+- **Immediately upon triggering**, before running any parsing tasks, run `python3 <skill_dir>/scripts/parse.py --show-usage` (or fetch programmatically) and notify the user of LlamaParse's Free Plan monthly limit (10,000 Credits) and how many credits have currently been used.
+- **Every time a conversion task completes**, display the updated Free Plan usage as printed by the script.
 - Report parsing completion details (e.g., number of pages, output format, output file path).
-- Show the LlamaParse Free Plan Usage (credits used and remaining) automatically reported by the script.
 - Show a brief preview of the parsed content to the user.

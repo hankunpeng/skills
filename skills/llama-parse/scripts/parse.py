@@ -23,7 +23,7 @@ def check_dependencies():
         print("Please install them using: pip install llama-parse", file=sys.stderr)
         sys.exit(1)
 
-def print_free_plan_usage(api_key):
+def print_free_plan_usage(api_key, prefix=""):
     try:
         # 1. Get organization ID
         orgs_req = urllib.request.Request(
@@ -50,7 +50,7 @@ def print_free_plan_usage(api_key):
             start = free_credits[0].get("starting_balance", 0)
             remain = free_credits[0].get("remaining_balance", 0)
             used = start - remain
-            print(f"\n[LlamaParse Free Plan Usage]: Used {used} / {start} credits ({remain} remaining).", file=sys.stderr)
+            print(f"{prefix}[LlamaParse Free Plan Usage]: Monthly limit is {start} credits. Currently used: {used} credits ({remain} remaining).", file=sys.stderr)
     except Exception:
         # Gracefully ignore if we cannot fetch billing info
         pass
@@ -61,7 +61,7 @@ def main():
     )
     parser.add_argument(
         "input_files", 
-        nargs="+", 
+        nargs="*", 
         help="One or more paths to the documents to parse (PDF, DOCX, PPTX, XLSX, PNG, etc.)"
     )
     parser.add_argument(
@@ -106,6 +106,11 @@ def main():
         help="Name of the vendor multimodal model to use (default: gpt-4o)"
     )
     parser.add_argument(
+        "--show-usage",
+        action="store_true",
+        help="Only query and print the LlamaParse Free Plan credit usage, then exit."
+    )
+    parser.add_argument(
         "-v", "--verbose", 
         action="store_true", 
         help="Print verbose logs from LlamaParse"
@@ -123,7 +128,15 @@ def main():
         print("Please obtain an API key from https://cloud.llamaindex.ai/ and configure it.", file=sys.stderr)
         sys.exit(1)
         
-    # Check if input files exist
+    # If only showing usage
+    if args.show_usage:
+        print_free_plan_usage(api_key)
+        sys.exit(0)
+        
+    # Check if input files exist when not showing usage
+    if not args.input_files:
+        parser.error("the following arguments are required: input_files (or use --show-usage)")
+        
     for f in args.input_files:
         if not os.path.exists(f):
             print(f"Error: Input file '{f}' does not exist.", file=sys.stderr)
@@ -166,7 +179,7 @@ def main():
             results.append((input_file, output_content))
             
             # Show Free plan usage after each file is parsed
-            print_free_plan_usage(api_key)
+            print_free_plan_usage(api_key, prefix="\n")
             
         # 4. Handle Output
         if args.output:
