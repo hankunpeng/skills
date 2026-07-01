@@ -1,5 +1,4 @@
 node_modules/
-.DS_Store
 dist/
 build/
 .env
@@ -7,4 +6,22 @@ build/
 *.log
 __pycache__/
 *.pyc
+
+# macOS files
+.DS_Store
+
+# AI assistant files
+.agents/
+.claude/
+.gemini/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Temporary analysis and report documents
+*_report.md
+*-report.md
+*报告.md
 
