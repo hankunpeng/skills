@@ -2,7 +2,7 @@
 """
 LlamaParse Helper Script
 Parses PDF, Word, PowerPoint, Excel, and image documents into Markdown or JSON.
-If LlamaParse credits are exhausted or the service fails, it falls back to local LiteParse (lit).
+If LlamaParse credits are exhausted or the service fails, it can fall back to local LiteParse (lit) after user confirmation.
 """
 
 import os
@@ -60,6 +60,18 @@ def print_free_plan_usage(api_key, prefix=""):
     except Exception:
         # Gracefully ignore if we cannot fetch billing info
         pass
+
+def confirm_fallback():
+    """
+    Prompts the user via stderr to confirm fallback to LiteParse.
+    """
+    try:
+        sys.stderr.write("\nWould you like to fall back to local LiteParse (lit)? [y/N]: ")
+        sys.stderr.flush()
+        response = sys.stdin.readline().strip().lower()
+        return response in ("y", "yes")
+    except (KeyboardInterrupt, EOFError):
+        return False
 
 def run_liteparse_fallback(input_file, args):
     """
@@ -140,6 +152,11 @@ def main():
         help="Name of the vendor multimodal model to use (default: gpt-4o)"
     )
     parser.add_argument(
+        "-y", "--yes",
+        action="store_true",
+        help="Automatically approve falling back to LiteParse without prompting."
+    )
+    parser.add_argument(
         "--show-usage",
         action="store_true",
         help="Only query and print the LlamaParse Free Plan credit usage, then exit."
@@ -160,8 +177,12 @@ def main():
     use_fallback_only = False
     if not api_key:
         print("Warning: LLAMA_CLOUD_API_KEY is not set and no --api-key flag was provided.", file=sys.stderr)
-        print("Falling back to local LiteParse (lit) directly...", file=sys.stderr)
-        use_fallback_only = True
+        if args.yes or confirm_fallback():
+            print("Falling back to local LiteParse (lit) directly...", file=sys.stderr)
+            use_fallback_only = True
+        else:
+            print("Error: No API key available and fallback to LiteParse was declined.", file=sys.stderr)
+            sys.exit(1)
         
     # If only showing usage
     if args.show_usage:
@@ -222,7 +243,12 @@ def main():
                     print_free_plan_usage(api_key, prefix="\n")
                 except Exception as e:
                     print(f"Warning: LlamaParse failed with error: {e}", file=sys.stderr)
-                    print("Falling back to local LiteParse (lit)...", file=sys.stderr)
+                    if args.yes or confirm_fallback():
+                        print("Falling back to local LiteParse (lit)...", file=sys.stderr)
+                        use_fallback_only = True
+                    else:
+                        print("Error: LlamaParse failed and fallback to LiteParse was declined.", file=sys.stderr)
+                        sys.exit(1)
             
             if output_content is None:
                 output_content = run_liteparse_fallback(input_file, args)
