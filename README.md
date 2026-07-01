@@ -48,6 +48,13 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill twitter
   ```
 
+### 7. LlamaParse Document Parsing (`llama-parse`)
+* **Description**: Parses complex PDFs, Word documents (docx), PowerPoint presentations (pptx), Excel sheets (xlsx), and images into clean Markdown or structured JSON using the LlamaParse API. Preserves layouts and extracts tables accurately.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/skills --skill llama-parse
+  ```
+
 ---
 
 
