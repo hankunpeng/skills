@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # commit-lint.sh - Lint a commit message against Conventional Commits spec.
+set -euo pipefail
 
 # Get message to lint
-if [ -n "$1" ]; then
+if [ -n "${1:-}" ]; then
   if [ -f "$1" ]; then
     MSG=$(cat "$1")
   else
@@ -13,20 +14,17 @@ else
   MSG=$(cat)
 fi
 
-# Trim whitespace
-MSG=$(echo "$MSG" | xargs)
+# Extract first line and trim leading/trailing whitespace
+FIRST_LINE=$(echo "$MSG" | head -n 1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
-if [ -z "$MSG" ]; then
+if [ -z "$FIRST_LINE" ]; then
   echo "Error: Empty commit message."
   exit 1
 fi
 
 # Regex pattern for conventional commit message header
 # Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
-PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9_-]+\))?!?: .+$"
-
-# Get first line of message
-FIRST_LINE=$(echo "$MSG" | head -n 1)
+PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9._/-]+\))?!?: .+$"
 
 if [[ "$FIRST_LINE" =~ $PATTERN ]]; then
   echo "✔ Commit message style is valid!"

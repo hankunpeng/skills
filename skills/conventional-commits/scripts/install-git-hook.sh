@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # install-git-hook.sh - Installs commit-msg git hook to enforce Conventional Commits.
+set -euo pipefail
 
 TARGET_DIR="${1:-.}"
 
@@ -8,9 +9,27 @@ if [ ! -d "$TARGET_DIR/.git" ]; then
   exit 1
 fi
 
-HOOK_FILE="$TARGET_DIR/.git/hooks/commit-msg"
+# Respect core.hooksPath if configured, otherwise default to .git/hooks
+HOOKS_DIR=$(git -C "$TARGET_DIR" config core.hooksPath 2>/dev/null || echo "$TARGET_DIR/.git/hooks")
+mkdir -p "$HOOKS_DIR"
+
+HOOK_FILE="$HOOKS_DIR/commit-msg"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LINTER_PATH="$SCRIPT_DIR/commit-lint.sh"
+
+# Protect existing hook from silent overwrite
+if [ -f "$HOOK_FILE" ]; then
+  echo "Warning: $HOOK_FILE already exists."
+  if [ -t 0 ]; then
+    read -p "Overwrite? (y/N) " REPLY
+    if [[ ! "${REPLY:-}" =~ ^[Yy]$ ]]; then
+      echo "Aborted. Existing hook was not modified."
+      exit 0
+    fi
+  else
+    echo "Running non-interactively — overwriting existing hook."
+  fi
+fi
 
 cat <<EOF > "$HOOK_FILE"
 #!/bin/bash
