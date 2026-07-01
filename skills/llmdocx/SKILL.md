@@ -1,5 +1,5 @@
 ---
-name: docx
+name: llmdocx
 description: "Use this skill to convert docx and other office documents to Markdown using markitdown, or perform document content analysis. Triggers include: markitdown, convert docx to md, convert word to markdown, document extraction."
 license: Proprietary. LICENSE.txt has complete terms
 ---
