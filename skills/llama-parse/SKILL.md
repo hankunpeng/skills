@@ -132,6 +132,8 @@ json_results = parser.get_json_result("./my_document.pdf")
 - **Rate Limits**: If you run out of credits or hit concurrency rate limits, LlamaParse calls might fail. Use `-p` to target specific pages to save credits, or run with `-v` to debug API response codes.
 - **Form and Table Extraction**: For documents with heavily structured forms or graphics, always pass `--use-vendor-model` to invoke multimodal GPT-4o parsing.
 - **Empty Output**: Ensure the file type is supported. Supported file types include `.pdf`, `.docx`, `.pptx`, `.xlsx`, `.png`, `.jpg`, `.jpeg`, `.tiff`.
+- **LiteParse (lit) Fallback**: If LlamaParse credits are exhausted, or the API call fails/times out, or no API key is set, the helper script automatically falls back to local LiteParse (`lit`) to complete the document parsing seamlessly.
+
 
 ## User Communication
 - **Immediately upon triggering**, before running any parsing tasks, run `python3 <skill_dir>/scripts/parse.py --show-usage` (or fetch programmatically) and notify the user of LlamaParse's Free Plan monthly limit (10,000 Credits) and how many credits have currently been used.
