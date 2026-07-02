@@ -1,30 +1,32 @@
 #!/usr/bin/env python3
 """
-LlamaParse Helper Script
-Parses PDF, Word, PowerPoint, Excel, and image documents into Markdown or JSON.
+LlamaParse Helper Script (Modernized)
+Parses PDF, Word, PowerPoint, Excel, and image documents into Markdown or JSON
+using the new unified llama-cloud SDK.
 """
 
 import os
 import sys
+import time
 import argparse
 import json
 import urllib.request
-import urllib.error
+import urllib.parse
 import warnings
 
-# Suppress LlamaParse deprecation warning to keep console output clean
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+# Suppress warnings to keep console output clean
+warnings.filterwarnings("ignore")
 
 def check_dependencies():
     missing = []
     try:
-        import llama_parse
+        import llama_cloud
     except ImportError:
-        missing.append("llama-parse")
+        missing.append("llama-cloud")
     
     if missing:
         print(f"Error: Missing dependencies: {', '.join(missing)}", file=sys.stderr)
-        print("Please install them using: pip install llama-parse", file=sys.stderr)
+        print("Please install them using: pip install llama-cloud", file=sys.stderr)
         sys.exit(1)
 
 def print_free_plan_usage(api_key, prefix=""):
@@ -65,7 +67,7 @@ def print_free_plan_usage(api_key, prefix=""):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Parse documents to Markdown or JSON using LlamaParse API."
+        description="Parse documents to Markdown or JSON using the unified LlamaCloud API."
     )
     parser.add_argument(
         "input_files", 
@@ -87,12 +89,18 @@ def main():
         help="Result type (default: markdown)"
     )
     parser.add_argument(
+        "--tier",
+        choices=["fast", "cost_effective", "agentic", "agentic_plus"],
+        default="agentic",
+        help="Parsing tier (default: agentic). Replaces older --use-vendor-model flag."
+    )
+    parser.add_argument(
         "-i", "--instruction", 
         help="Custom parsing instruction (prompt) to guide the parser"
     )
     parser.add_argument(
         "-l", "--language", 
-        help="Language code (e.g., 'en', 'ch_sim' for simplified Chinese)"
+        help="Language code for OCR (e.g., 'en', 'de', 'ch_sim' for simplified Chinese)"
     )
     parser.add_argument(
         "-p", "--pages", 
@@ -101,17 +109,21 @@ def main():
     parser.add_argument(
         "-j", "--json", 
         action="store_true", 
-        help="Output raw JSON results instead of text"
+        help="Output raw JSON results instead of text/markdown"
+    )
+    parser.add_argument(
+        "-d", "--download-images",
+        action="store_true",
+        help="Download extracted images/screenshots to the output directory"
     )
     parser.add_argument(
         "--use-vendor-model", 
         action="store_true", 
-        help="Enable vendor multimodal model parsing for complex layout and images"
+        help="Deprecated flag (mapped to tier='agentic')"
     )
     parser.add_argument(
         "--vendor-model-name", 
-        default="gpt-4o", 
-        help="Name of the vendor multimodal model to use (default: gpt-4o)"
+        help="Deprecated flag. Model selection is now handled on the server side via the tier configuration."
     )
     parser.add_argument(
         "--show-usage",
@@ -121,7 +133,7 @@ def main():
     parser.add_argument(
         "-v", "--verbose", 
         action="store_true", 
-        help="Print verbose logs from LlamaParse"
+        help="Print verbose logs"
     )
     
     args = parser.parse_args()
@@ -149,76 +161,172 @@ def main():
         if not os.path.exists(f):
             print(f"Error: Input file '{f}' does not exist.", file=sys.stderr)
             sys.exit(1)
-        
-    from llama_parse import LlamaParse
-    # 3. Initialize parser
-    # We apply nest_asyncio in case we are in an environment with a running event loop
-    try:
-        import nest_asyncio
-        nest_asyncio.apply()
-    except Exception:
-        pass
+            
+    # Handle deprecated flags
+    tier = args.tier
+    if args.use_vendor_model:
+        if args.verbose:
+            print("[Info] Deprecated flag --use-vendor-model mapped to tier='agentic'.", file=sys.stderr)
+        tier = "agentic"
+    if args.vendor_model_name and args.verbose:
+        print(f"[Warning] Deprecated flag --vendor-model-name '{args.vendor_model_name}' ignored. Model selection is handled via --tier.", file=sys.stderr)
 
-    llama_parser = LlamaParse(
-        api_key=api_key,
-        result_type=args.type,
-        parsing_instruction=args.instruction,
-        language=args.language,
-        target_pages=args.pages,
-        use_vendor_multimodal_model=args.use_vendor_model,
-        vendor_multimodal_model_name=args.vendor_model_name if args.use_vendor_model else None,
-        verbose=args.verbose
+    from llama_cloud.client import LlamaCloud
+    from llama_cloud import (
+        LlamaParseAgenticOptions,
+        LlamaParseInputOptions,
+        LlamaParseOutputOptions,
+        LlamaParseProcessingOptions,
+        LlamaParseOcrParameters,
+        LlamaParsePageRanges
     )
+    
+    # 3. Initialize LlamaCloud Client
+    client = LlamaCloud(token=api_key)
     
     try:
         results = []
         for input_file in args.input_files:
             if args.verbose:
-                print(f"Parsing '{input_file}'...", file=sys.stderr)
-            
-            if args.json:
-                json_result = llama_parser.get_json_result(input_file)
-                output_content = json.dumps(json_result, indent=2, ensure_ascii=False)
-            else:
-                documents = llama_parser.load_data(input_file)
-                output_content = "\n\n".join([doc.text for doc in documents])
+                print(f"Uploading '{input_file}' to Llama Cloud...", file=sys.stderr)
                 
-            results.append((input_file, output_content))
+            # Step 1: Upload file to get file_id
+            with open(input_file, "rb") as f:
+                file_obj = client.files.upload_file(upload_file=f)
+            file_id = file_obj.id
             
+            if args.verbose:
+                print(f"Uploaded successfully. File ID: {file_id}. Starting parse job...", file=sys.stderr)
+                
+            # Step 2: Configure parsing options
+            agentic_opts = None
+            if args.instruction:
+                agentic_opts = LlamaParseAgenticOptions(custom_prompt=args.instruction)
+                
+            processing_opts = None
+            if args.language:
+                processing_opts = LlamaParseProcessingOptions(
+                    ocr_parameters=LlamaParseOcrParameters(languages=[args.language])
+                )
+                
+            page_ranges = None
+            if args.pages:
+                page_ranges = LlamaParsePageRanges(target_pages=args.pages)
+                
+            output_opts = None
+            if args.download_images:
+                output_opts = LlamaParseOutputOptions(images_to_save=["screenshot"])
+                
+            # Step 3: Trigger the parsing job
+            job = client.v_2.parse_file(
+                file_id=file_id,
+                tier=tier,
+                version="latest",
+                agentic_options=agentic_opts,
+                processing_options=processing_opts,
+                page_ranges=page_ranges,
+                output_options=output_opts
+            )
+            
+            # Step 4: Poll for completion
+            if args.verbose:
+                print(f"Job ID: {job.id}. Polling status...", file=sys.stderr)
+                
+            expand_fields = ["items"] if args.json else [args.type]
+            if args.download_images:
+                expand_fields.append("images_content_metadata")
+                
+            while True:
+                # Retrieve status
+                res = client.v_2.get_parse_job(job.id, expand=expand_fields)
+                status = res.job.status
+                
+                if args.verbose:
+                    print(f"Current status: {status}", file=sys.stderr)
+                    
+                if status == "COMPLETED":
+                    break
+                elif status in ("FAILED", "CANCELLED"):
+                    raise Exception(f"Parsing job failed/cancelled with status '{status}'. Error: {res.job.error_message}")
+                    
+                time.sleep(2)
+                
+            # Step 5: Format parsed content
+            if args.json:
+                # Fetch raw JSON result
+                json_res = client.parsing.get_job_json_result(job.id)
+                output_content = json.dumps(json_res.dict(), indent=2, ensure_ascii=False)
+            else:
+                if args.type == "markdown":
+                    output_content = "\n\n".join([page.markdown for page in res.markdown.pages if page.markdown])
+                else:
+                    output_content = "\n\n".join([page.text for page in res.text.pages if page.text])
+                    
+            results.append((input_file, output_content, res))
+            
+            # Download images if requested
+            if args.download_images and res.images_content_metadata:
+                for img in res.images_content_metadata.images:
+                    if img.url:
+                        img_name = os.path.basename(img.url)
+                        
+                        # Determine output path
+                        if args.output:
+                            if os.path.isdir(args.output):
+                                img_path = os.path.join(args.output, img_name)
+                            else:
+                                img_path = os.path.join(os.path.dirname(args.output) or ".", img_name)
+                        else:
+                            img_path = img_name
+                            
+                        if args.verbose:
+                            print(f"Downloading image: {img_name} -> {img_path}", file=sys.stderr)
+                            
+                        try:
+                            img_req = urllib.request.Request(
+                                img.url,
+                                headers={"Authorization": f"Bearer {api_key}"}
+                            )
+                            with urllib.request.urlopen(img_req) as img_resp:
+                                with open(img_path, "wb") as img_file:
+                                    img_file.write(img_resp.read())
+                        except Exception as img_err:
+                            print(f"Warning: Failed to download image {img_name}: {img_err}", file=sys.stderr)
+                            
             # Show Free plan usage after each file is parsed
             print_free_plan_usage(api_key, prefix="\n")
             
-        # 4. Handle Output
+        # 6. Handle Output Writing
         if args.output:
             if os.path.isdir(args.output):
-                for input_file, content in results:
+                for input_file, content, _ in results:
                     base = os.path.splitext(os.path.basename(input_file))[0]
-                    ext = ".json" if args.json else ".md"
+                    ext = ".json" if args.json else ".md" if args.type == "markdown" else ".txt"
                     out_path = os.path.join(args.output, base + ext)
-                    with open(out_path, "w", encoding="utf-8") as f:
-                        f.write(content)
+                    with open(out_path, "w", encoding="utf-8") as out_file:
+                        out_file.write(content)
                     print(f"Successfully saved parsed content to: {out_path}", file=sys.stderr)
             else:
                 # If single output file and multiple inputs, concatenate them
                 concatenated = ""
-                for idx, (input_file, content) in enumerate(results):
+                for idx, (input_file, content, _) in enumerate(results):
                     if len(results) > 1:
                         concatenated += f"<!-- START OF FILE: {input_file} -->\n"
                     concatenated += content
                     if len(results) > 1:
                         concatenated += f"\n<!-- END OF FILE: {input_file} -->\n\n"
                 
-                with open(args.output, "w", encoding="utf-8") as f:
-                    f.write(concatenated)
+                with open(args.output, "w", encoding="utf-8") as out_file:
+                    out_file.write(concatenated)
                 print(f"Successfully saved parsed content to: {args.output}", file=sys.stderr)
         else:
-            for idx, (input_file, content) in enumerate(results):
+            for idx, (input_file, content, _) in enumerate(results):
                 if len(results) > 1:
                     print(f"--- File: {input_file} ---", file=sys.stderr)
                 print(content)
                 if len(results) > 1 and idx < len(results) - 1:
                     print("\n" + "="*40 + "\n", file=sys.stderr)
-            
+                    
     except Exception as e:
         print(f"Error occurred during parsing: {e}", file=sys.stderr)
         sys.exit(1)
