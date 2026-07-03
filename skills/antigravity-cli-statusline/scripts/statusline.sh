@@ -8,15 +8,22 @@ model_name=$(echo "$JSON_INPUT" | jq -r '.model.display_name // "Gemini"')
 terminal_width=$(echo "$JSON_INPUT" | jq -r '.terminal_width // 80')
 agent_state=$(echo "$JSON_INPUT" | jq -r '.agent_state // "idle"')
 
+# Determine the quota prefix based on the model name
+if [[ "$model_name" =~ [Gg]emini ]]; then
+  quota_prefix="gemini"
+else
+  quota_prefix="3p"
+fi
+
 # 使用 jq 计算 5H 和 7D 的剩余百分比并取整
-gemini_5h_pct=$(echo "$JSON_INPUT" | jq -r '.quota["gemini-5h"].remaining_fraction // 1 | . * 100 | round')
-gemini_weekly_pct=$(echo "$JSON_INPUT" | jq -r '.quota["gemini-weekly"].remaining_fraction // 1 | . * 100 | round')
+quota_5h_pct=$(echo "$JSON_INPUT" | jq -r ".quota[\"${quota_prefix}-5h\"].remaining_fraction // 1 | . * 100 | round")
+quota_weekly_pct=$(echo "$JSON_INPUT" | jq -r ".quota[\"${quota_prefix}-weekly\"].remaining_fraction // 1 | . * 100 | round")
 
 # 解析 5H 刷新时间
-gemini_5h_reset_sec=$(echo "$JSON_INPUT" | jq -r '.quota["gemini-5h"].reset_in_seconds // 0')
-if [ "$gemini_5h_reset_sec" -gt 0 ]; then
-  hours=$((gemini_5h_reset_sec / 3600))
-  minutes=$(((gemini_5h_reset_sec % 3600) / 60))
+quota_5h_reset_sec=$(echo "$JSON_INPUT" | jq -r ".quota[\"${quota_prefix}-5h\"].reset_in_seconds // 0")
+if [ "$quota_5h_reset_sec" -gt 0 ]; then
+  hours=$((quota_5h_reset_sec / 3600))
+  minutes=$(((quota_5h_reset_sec % 3600) / 60))
   if [ "$hours" -lt 1 ]; then
     emoji="⌛"
   else
@@ -78,10 +85,10 @@ left_custom_width=$(( ${#cwd_formatted} + 3 ))
 
 # Right custom text
 if [ -n "$refresh_text" ]; then
-  right_custom="${refresh_text}5H: ${gemini_5h_pct}% | 7D: ${gemini_weekly_pct}%"
+  right_custom="${refresh_text}5H: ${quota_5h_pct}% | 7D: ${quota_weekly_pct}%"
   right_custom_width=$(( ${#right_custom} + 1 )) # add 1 to compensate for emoji width
 else
-  right_custom="5H: ${gemini_5h_pct}% | 7D: ${gemini_weekly_pct}%"
+  right_custom="5H: ${quota_5h_pct}% | 7D: ${quota_weekly_pct}%"
   right_custom_width=${#right_custom}
 fi
 
@@ -94,10 +101,10 @@ if [ "$terminal_width" -ge "$min_total_width" ]; then
 
   if [ -n "$refresh_text" ]; then
     printf "📂 \033[34m%s\033[0m%s\033[33m%s ${hours}h ${minutes}m\033[0m \033[32m|\033[0m \033[35m5H: %s%%\033[0m \033[32m|\033[0m \033[36m7D: %s%%\033[0m\n" \
-      "$cwd_formatted" "$padding_custom" "$emoji" "$gemini_5h_pct" "$gemini_weekly_pct"
+      "$cwd_formatted" "$padding_custom" "$emoji" "$quota_5h_pct" "$quota_weekly_pct"
   else
     printf "📂 \033[34m%s\033[0m%s\033[35m5H: %s%%\033[0m \033[32m|\033[0m \033[36m7D: %s%%\033[0m\n" \
-      "$cwd_formatted" "$padding_custom" "$gemini_5h_pct" "$gemini_weekly_pct"
+      "$cwd_formatted" "$padding_custom" "$quota_5h_pct" "$quota_weekly_pct"
   fi
 else
   # Width insufficient: Print CWD on Line 2, and Quotas on Line 3
@@ -115,9 +122,9 @@ else
 
   if [ -n "$refresh_text" ]; then
     printf "%s\033[33m%s ${hours}h ${minutes}m\033[0m \033[32m|\033[0m \033[35m5H: %s%%\033[0m \033[32m|\033[0m \033[36m7D: %s%%\033[0m\n" \
-      "$padding" "$emoji" "$gemini_5h_pct" "$gemini_weekly_pct"
+      "$padding" "$emoji" "$quota_5h_pct" "$quota_weekly_pct"
   else
     printf "%s\033[35m5H: %s%%\033[0m \033[32m|\033[0m \033[36m7D: %s%%\033[0m\n" \
-      "$padding" "$gemini_5h_pct" "$gemini_weekly_pct"
+      "$padding" "$quota_5h_pct" "$quota_weekly_pct"
   fi
 fi
