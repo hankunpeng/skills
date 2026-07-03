@@ -53,14 +53,33 @@ def main(args) -> None:
   target_dir = Path(f"yt_{video_id}")
   target_dir.mkdir(parents=True, exist_ok=True)
 
-  subprocess.run([
-    'yt-dlp', '--sub-langs', args.lang, '--write-subs', '--write-auto-subs', '--skip-download',
-    *extra_args,
-    args.url,
-  ],
-    cwd=target_dir,
-    check=True,
-  )
+  try:
+    subprocess.run([
+      'yt-dlp', '--sub-langs', args.lang, '--write-subs', '--write-auto-subs', '--skip-download',
+      *extra_args,
+      args.url,
+    ],
+      cwd=target_dir,
+      check=True,
+    )
+  except subprocess.CalledProcessError as e:
+    # If first attempt fails and no cookies argument was explicitly passed, retry with Chrome cookies
+    if not any('--cookies' in arg for arg in extra_args):
+      print("Warning: Initial download failed. Retrying automatically with Chrome cookies...", file=sys.stderr)
+      try:
+        subprocess.run([
+          'yt-dlp', '--sub-langs', args.lang, '--write-subs', '--write-auto-subs', '--skip-download',
+          '--cookies-from-browser', 'chrome',
+          *extra_args,
+          args.url,
+        ],
+          cwd=target_dir,
+          check=True,
+        )
+      except subprocess.CalledProcessError:
+        raise e
+    else:
+      raise e
 
   sub_files = [f for f in target_dir.iterdir() if f.is_file() and not f.name.startswith('.') and f.name != 'summary.md']
   if not sub_files:
