@@ -48,6 +48,13 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill llama-parse
   ```
 
+### 7. YouTube Video Summarizer (`yt-summarize`)
+* **Description**: Downloads YouTube subtitles and summarizes the video content using Gemini models while filtering out sponsor promotions.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/skills --skill yt-summarize
+  ```
+
 
 ---
 
