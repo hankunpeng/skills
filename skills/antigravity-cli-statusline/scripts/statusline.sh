@@ -63,7 +63,7 @@ context_used_pct=$(echo "$JSON_INPUT" | jq -r '.context_window.used_percentage /
 context_tokens_formatted=$(echo "$JSON_INPUT" | jq -r 'if .context_window then (if (.context_window.total_input_tokens // 0) >= 1000000 then "\((.context_window.total_input_tokens/1000000 | round))M" else "\((.context_window.total_input_tokens/1000 | round))k" end) else "0k" end')
 context_limit_formatted=$(echo "$JSON_INPUT" | jq -r 'if .context_window then (if (.context_window.context_window_size // 0) >= 1000000 then "\((.context_window.context_window_size/1000000 | round))M" else "\((.context_window.context_window_size/1000 | round))k" end) else "0k" end')
 
-right_native="● ${model_name} | ${context_used_pct}% (${context_tokens_formatted}/${context_limit_formatted})"
+right_native="● ${model_name} | 📜 ${context_used_pct}% (${context_tokens_formatted}/${context_limit_formatted})"
 right_native_len=${#right_native}
 
 # Calculate padding for Line 1
@@ -74,7 +74,7 @@ fi
 padding_native=$(printf '%*s' "$padding_native_count" "")
 
 # Print Line 1: Native Status Line (Left side in dim grey, ● in green, model and context in default colors)
-printf "\033[90m%s\033[0m%s\033[32m●\033[0m \033[37m%s\033[0m \033[32m|\033[0m \033[37m%s%% (%s/%s)\033[0m\n" \
+printf "\033[90m%s\033[0m%s\033[32m●\033[0m \033[37m%s\033[0m \033[32m|\033[0m \033[37m📜 %s%% (%s/%s)\033[0m\n" \
   "$left_native" "$padding_native" "$model_name" "$context_used_pct" "$context_tokens_formatted" "$context_limit_formatted"
 
 
