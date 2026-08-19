@@ -1,0 +1,53 @@
+{
+  "skill_name": "semver-recommender",
+  "evals": [
+    {
+      "id": 1,
+      "name": "breaking-change-api-removal",
+      "prompt": "我们在项目中重构了 3D 渲染器，删除了旧的 `OrbitControls.setDistance()` 方法，并将主导出函数 `renderScene(scene, camera, config)` 改为 `renderScene(options)`（必须传入包含 options 的对象）。当前版本是 v1.2.3，请帮我分析应该升哪个 SemVer 版本号？",
+      "expected_output": "应推荐 MAJOR 升级（v2.0.0），并指出删除了 `setDistance` 以及修改了 `renderScene` 的参数契约属于 Breaking Change。",
+      "assertions": [
+        {
+          "text": "推荐升级类型为 MAJOR",
+          "target": "v2.0.0"
+        },
+        {
+          "text": "明确指出了破坏性变更详情（如删除方法或更改参数签名）",
+          "target": "Breaking Changes"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "backward-compatible-new-feature",
+      "prompt": "我们在卫星轨道应用中新增了一个可选的天气云层渲染图层 `addCloudLayer(opacity = 0.5)`，所有原有 API 和调用方式完全保持向下兼容。当前版本是 v1.4.2，并且准备调用 `node build.js xj-v1.html` 打包，请推荐下一个版本号和打包命令。",
+      "expected_output": "应推荐 MINOR 升级（v1.5.0），并在后续操作中建议执行打包命令形如 `node build.js xj-v1.html -o ... -v 1.5.0`。",
+      "assertions": [
+        {
+          "text": "推荐升级类型为 MINOR",
+          "target": "v1.5.0"
+        },
+        {
+          "text": "提供了构建与发布命令联动建议",
+          "target": "build.js"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "internal-bugfix-and-perf-optimization",
+      "prompt": "这次提交修复了一个在 Safari 浏览器下 WebGL 上下文丢失的内存泄漏 bug，并微调了部分内部数学矩阵计算的性能，没有暴露任何新的公开 API，也没有改变外部行为。当前版本是 v2.0.1，请推导下一个版本。",
+      "expected_output": "应推荐 PATCH 升级（v2.0.2），且明确归类为修复/性能优化，无破坏性变更或新增特性。",
+      "assertions": [
+        {
+          "text": "推荐升级类型为 PATCH",
+          "target": "v2.0.2"
+        },
+        {
+          "text": "识别出无破坏性变更且无新公开 API",
+          "target": "PATCH"
+        }
+      ]
+    }
+  ]
+}
