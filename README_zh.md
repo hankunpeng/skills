@@ -57,6 +57,13 @@
   npx skills add hankunpeng/skills --skill llama-parse
   ```
 
+### 8. 语义化版本智能推导 (`semver-recommender`)
+* **说明**：智能分析代码改动、API 契约 Diff 和 Commit 提交记录，自动推导并推荐下一个符合语义化版本规范（SemVer MAJOR、MINOR 或 PATCH）的版本号，并给出详细的决策依据与破坏性变更检测。
+* **安装**：
+  ```bash
+  npx skills add hankunpeng/skills --skill semver-recommender
+  ```
+
 
 ---
 
