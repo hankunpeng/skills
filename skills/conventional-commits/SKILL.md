@@ -24,6 +24,12 @@ This skill enforces, validates, and manages Conventional Commits inside reposito
 [optional footer(s)]
 ```
 
+### Message Content
+
+- Write the description as the commit's net change relative to the prior committed state. State the final result, not the implementation process.
+- Do not narrate temporary implementations or abandoned attempts. Never claim to remove, replace, restore, or revert a state that never existed in committed history.
+- Use the body for verified, durable context that helps future maintainers, such as motivation, root cause, constraints, risks, compatibility impact, or migration guidance. Explain trade-offs as reasons for the final design rather than as a chronology of attempts, and do not invent context unsupported by the available evidence.
+
 ### Types
 
 - `feat`: A new feature for the user.
@@ -88,7 +94,13 @@ BREAKING CHANGE: /v1/user/* endpoints no longer exist
 Refs #567
 ```
 
-**Example 4 — Invalid (missing type):**
+**Example 4 — Describe the net change, not uncommitted history:**
+```
+feat(cache): add in-memory caching
+```
+Do not write `refactor(cache): replace Redis with in-memory caching` unless the Redis implementation exists in the prior committed state.
+
+**Example 5 — Invalid (missing type):**
 ```
 added new login page
 ```
