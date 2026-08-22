@@ -57,6 +57,13 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill semver-recommender
   ```
 
+### 8. Explain Like I'm 5 (`eli5`)
+* **Description**: Explain complex topics in simple, intuitive terms using bilingual English and Chinese (line-by-line format) and visual HTML artifacts.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/skills --skill eli5
+  ```
+
 
 ---
 
