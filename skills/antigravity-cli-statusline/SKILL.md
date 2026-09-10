@@ -14,7 +14,7 @@ This skill allows configuring, installing, or updating the custom status bar con
 - **Double-line / Single-line Auto Layout**: For custom telemetry additions (Line 2), automatically fits path and quotas into a single line if terminal width permits, otherwise wraps custom additions to a clean secondary line.
 - **Directory Emoji**: Prepend `📂` to the leftmost side of the path.
 - **Token Quota Display**: Displays 5H (5-hour) and 7D (weekly) remaining fraction percentages.
-- **Live Refresh Countdown**: Displays `⏳ Xh Ym` (if >= 1h) or `⌛ 0h Ym` (if < 1h) for the 5-hour quota reset time.
+- **Live Refresh Countdown**: Displays live refresh countdowns (`⏳ Xh Ym` / `⏳ Xd Yh` or `⌛ 0h Ym`) for both 5-hour (5H) and weekly (7D) quota reset times.
 - **Auto-Refresh**: Configures the status line to update every 60 seconds.
 
 ## Files Included
