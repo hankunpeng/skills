@@ -71,6 +71,13 @@
   npx skills add hankunpeng/skills --skill url-to-markdown
   ```
 
+### 10. Playwright 复用系统 Chrome (`playwright-use-chrome`)
+* **说明**：配置并强制 Playwright 直接使用系统中已安装的 Google Chrome 浏览器，避免下载体积庞大的自带 Chromium/WebKit/Firefox 二进制文件（节省约 1.5 GB ~ 2 GB 磁盘空间）。提供 TypeScript、JavaScript、Python 及命令行测试的标准配置模板。
+* **安装**：
+  ```bash
+  npx skills add hankunpeng/skills --skill playwright-use-chrome
+  ```
+
 
 ---
 

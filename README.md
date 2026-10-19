@@ -71,6 +71,13 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill url-to-markdown
   ```
 
+### 10. Playwright Use System Chrome (`playwright-use-chrome`)
+* **Description**: Configure and enforce Playwright to directly use the system's installed Google Chrome browser instead of downloading bulky bundled Chromium/WebKit/Firefox binaries (~1.5GB to 2GB). Provides configuration templates for TypeScript, JavaScript, Python, and CLI test runners.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/skills --skill playwright-use-chrome
+  ```
+
 
 ---
 
