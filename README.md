@@ -64,6 +64,13 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill eli5
   ```
 
+### 9. URL to Markdown (`url-to-markdown`)
+* **Description**: Fetch any URL and convert it to clean Markdown or structured JSON using Chrome CDP with site-specific adapters (X/Twitter, YouTube transcripts, Hacker News threads, and generic web pages via Defuddle), supporting interactive login/CAPTCHA wait modes and local media downloading.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/skills --skill url-to-markdown
+  ```
+
 
 ---
 

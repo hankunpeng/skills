@@ -64,6 +64,13 @@
   npx skills add hankunpeng/skills --skill eli5
   ```
 
+### 9. 网页转 Markdown (`url-to-markdown`)
+* **说明**：基于 Chrome CDP 与站点专用适配器抓取任意网页并转换为干净的 Markdown 或结构化 JSON。内置 X/Twitter、YouTube 字幕、Hacker News 评论串及通用网页（Defuddle）适配器，支持登录/验证码交互等待模式与本地媒体下载。
+* **安装**：
+  ```bash
+  npx skills add hankunpeng/skills --skill url-to-markdown
+  ```
+
 
 ---
 
