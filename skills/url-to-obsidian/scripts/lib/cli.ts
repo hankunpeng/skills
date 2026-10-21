@@ -15,6 +15,8 @@ Usage:
 
 Options:
   --output <file>       Save output to file
+  --output-dir <dir>    Base output directory when auto-generating output path
+  --folder-prefix <str> Custom folder name prefix (omits domain folder and auto-inserts lesson number if title starts with X.Y)
   --format <type>       Output format: markdown | json
   --json                Alias for --format json
   --adapter <name>      Force an adapter (e.g. x, generic)
@@ -133,6 +135,16 @@ export function parseArgs(argv: string[]): CliOptions {
     }
     if (value === "--output") {
       options.output = args[index + 1];
+      index += 1;
+      continue;
+    }
+    if (value === "--output-dir") {
+      options.outputDir = args[index + 1];
+      index += 1;
+      continue;
+    }
+    if (value === "--folder-prefix") {
+      options.folderPrefix = args[index + 1];
       index += 1;
       continue;
     }

@@ -1,4 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
 import { connectChrome, type ChromeConnection } from "../browser/chrome-launcher";
@@ -29,6 +31,8 @@ export type OutputFormat = "markdown" | "json";
 export interface ConvertCommandOptions {
   url?: string;
   output?: string;
+  outputDir?: string;
+  folderPrefix?: string;
   format: OutputFormat;
   adapter?: string;
   debugDir?: string;
@@ -365,12 +369,147 @@ function printOutput(content: string): void {
   }
 }
 
+interface ExtendPreferences {
+  defaultOutputDir?: string;
+  folderPrefix?: string;
+}
+
+function loadExtendPreferences(): ExtendPreferences {
+  const xdgConfig = process.env.XDG_CONFIG_HOME || join(homedir(), ".config");
+  const candidatePaths = [
+    ".config/skills/url-to-obsidian/EXTEND.md",
+    join(xdgConfig, "skills/url-to-obsidian/EXTEND.md"),
+    ".config/skills/url-to-markdown/EXTEND.md",
+    join(xdgConfig, "skills/url-to-markdown/EXTEND.md"),
+  ];
+
+  for (const candidate of candidatePaths) {
+    if (!existsSync(candidate)) {
+      continue;
+    }
+    try {
+      const content = readFileSync(candidate, "utf8");
+      const prefs: ExtendPreferences = {};
+      for (const line of content.split(/\r?\n/)) {
+        const match = line.match(/^\s*([a-zA-Z0-9_]+)\s*:\s*(.*?)\s*$/);
+        if (!match) {
+          continue;
+        }
+        const [, key, rawValue] = match;
+        const value = rawValue.replace(/^["']|["']$/g, "").trim();
+        if (key === "default_output_dir" && value) {
+          prefs.defaultOutputDir = value;
+        } else if (key === "folder_prefix" && value) {
+          prefs.folderPrefix = value;
+        }
+      }
+      return prefs;
+    } catch {
+      // Ignore unreadable preference file.
+    }
+  }
+
+  return {};
+}
+
+function deriveSlug(url: URL, title?: string): string {
+  const segments = url.pathname
+    .split("/")
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+  const lastSegment = segments[segments.length - 1];
+  if (lastSegment) {
+    const cleaned = lastSegment
+      .toLowerCase()
+      .replace(/\.[a-z0-9]+$/i, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    if (cleaned) {
+      return cleaned;
+    }
+  }
+
+  if (title) {
+    const cleanedTitle = title
+      .toLowerCase()
+      .replace(/^\s*\d+(?:\.[0-9a-z]+)?\s*[—–-]\s*/i, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .split("-")
+      .slice(0, 6)
+      .join("-");
+    if (cleanedTitle) {
+      return cleanedTitle;
+    }
+  }
+
+  return "article";
+}
+
+function extractSectionNumberFromTitle(title?: string): string | undefined {
+  if (!title) {
+    return undefined;
+  }
+  const match = title.match(/^\s*\d+\.([0-9a-zA-Z]+)\s*[—–-]/);
+  return match?.[1];
+}
+
+function resolveOutputFilePath(
+  options: ConvertCommandOptions,
+  url: URL,
+  document: ExtractedDocument,
+): string | undefined {
+  const prefs = loadExtendPreferences();
+  const folderPrefix = options.folderPrefix ?? prefs.folderPrefix;
+  const baseDir = options.outputDir ?? prefs.defaultOutputDir ?? "./url-to-obsidian";
+  const ext = options.format === "json" ? "json" : "md";
+  const slug = deriveSlug(url, document.title);
+  const section = extractSectionNumberFromTitle(document.title);
+
+  if (folderPrefix) {
+    const folderName =
+      section && !folderPrefix.endsWith(`${section}-`)
+        ? `${folderPrefix}${section}-${slug}`
+        : `${folderPrefix}${slug}`;
+
+    if (
+      !options.output ||
+      options.outputDir !== undefined ||
+      options.folderPrefix !== undefined ||
+      options.output.includes(`/${url.hostname}/`) ||
+      options.output.includes(`/${url.hostname.replace(/^www\./, "")}/`) ||
+      options.output.includes(`/${folderPrefix}${slug}/`)
+    ) {
+      return join(baseDir, folderName, `${slug}.${ext}`);
+    }
+  }
+
+  if (options.output) {
+    return options.output;
+  }
+
+  if (options.outputDir) {
+    const domain = url.hostname.replace(/^www\./, "");
+    return join(options.outputDir, domain, slug, `${slug}.${ext}`);
+  }
+
+  return undefined;
+}
+
 export async function runConvertCommand(options: ConvertCommandOptions): Promise<void> {
   if (!options.url) {
     throw new Error("URL is required");
   }
-  if (options.downloadMedia && !options.output) {
-    throw new Error("--download-media requires --output so media paths can be rewritten relative to the saved output file");
+  const initialPrefs = loadExtendPreferences();
+  if (
+    options.downloadMedia &&
+    !options.output &&
+    !options.outputDir &&
+    !options.folderPrefix &&
+    !initialPrefs.folderPrefix &&
+    !initialPrefs.defaultOutputDir
+  ) {
+    throw new Error("--download-media requires --output (or EXTEND.md output settings) so media paths can be rewritten relative to the saved output file");
   }
 
   const url = normalizeUrl(options.url);
@@ -505,23 +644,24 @@ export async function runConvertCommand(options: ConvertCommandOptions): Promise
     }
 
     document.requestedUrl ??= url.toString();
+    const resolvedOutputPath = resolveOutputFilePath(options, url, document);
 
     let markdown = renderMarkdown(document);
     let downloadResult:
       | Awaited<ReturnType<typeof downloadMediaAssets>>
       | null = null;
 
-    if (options.downloadMedia && options.output) {
+    if (options.downloadMedia && resolvedOutputPath) {
       downloadResult = mediaAdapter.downloadMedia
         ? await mediaAdapter.downloadMedia({
             media,
-            outputPath: options.output,
+            outputPath: resolvedOutputPath,
             mediaDir: options.mediaDir,
             log: logger,
           })
         : await downloadMediaAssets({
             media,
-            outputPath: options.output,
+            outputPath: resolvedOutputPath,
             mediaDir: options.mediaDir,
             log: logger,
           });
@@ -534,9 +674,9 @@ export async function runConvertCommand(options: ConvertCommandOptions): Promise
       }
     }
 
-    if (options.output) {
+    if (resolvedOutputPath) {
       await writeOutput(
-        options.output,
+        resolvedOutputPath,
         formatOutputContent(options.format, {
           adapter: document.adapter ?? adapter.name,
           status: "ok",
@@ -547,7 +687,7 @@ export async function runConvertCommand(options: ConvertCommandOptions): Promise
           markdown,
         }),
       );
-      logger.info(`Saved ${options.format} to ${options.output}`);
+      logger.info(`Saved ${options.format} to ${resolvedOutputPath}`);
     }
 
     if (options.debugDir) {

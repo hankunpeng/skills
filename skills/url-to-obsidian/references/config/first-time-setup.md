@@ -101,6 +101,7 @@ options:
 ```md
 download_media: [ask/1/0]
 default_output_dir: [path or empty]
+folder_prefix: [optional folder prefix or empty]
 ```
 
 ## Modifying Preferences Later

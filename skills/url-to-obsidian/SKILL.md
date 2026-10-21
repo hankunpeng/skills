@@ -89,6 +89,7 @@ Full template: [references/config/first-time-setup.md](references/config/first-t
 |-----|---------|--------|-------------|
 | `download_media` | `ask` | `ask` / `1` / `0` | `ask` = prompt each time, `1` = always, `0` = never |
 | `default_output_dir` | empty | path or empty | Default output directory (empty = `./url-to-obsidian/`) |
+| `folder_prefix` | empty | string or empty | Custom folder name prefix (e.g., `learncpp-chapter-0-getting-started-`). When set, omits the intermediate `{domain}/` directory and names the article folder `{folder_prefix}{section}-{slug}` (if page title starts with `X.Y — ...`) or `{folder_prefix}{slug}` |
 
 **EXTEND.md → CLI mapping**:
 
@@ -96,6 +97,7 @@ Full template: [references/config/first-time-setup.md](references/config/first-t
 |---------------|-------------|-------|
 | `download_media: 1` | `--download-media` | Requires `--output` to be set |
 | `default_output_dir: ./posts/` | Agent constructs `--output ./posts/{domain}/{slug}/{slug}.md` | Agent generates path, not a direct flag |
+| `folder_prefix: learncpp-chapter-0-getting-started-` | Agent constructs/renames folder to `{base_dir}/{folder_prefix}{section}-{slug}/{slug}.md` | Omits `{domain}/` layer; auto-extracts section number `Y` from `X.Y — Title` if present |
 
 **Value priority**: CLI arguments → EXTEND.md → skill defaults.
 
@@ -161,8 +163,15 @@ The agent must construct the output file path — `fetch` does not auto-generate
 1. Determine base directory from EXTEND.md `default_output_dir` or default `./url-to-obsidian/`
 2. Extract domain from URL (e.g., `example.com`)
 3. Generate slug from URL path or page title (kebab-case, 2-6 words)
-4. Construct: `{base_dir}/{domain}/{slug}/{slug}.md` — each URL gets its own directory so media files stay isolated
-5. Conflict resolution: append timestamp `{slug}-YYYYMMDD-HHMMSS/{slug}-YYYYMMDD-HHMMSS.md`
+4. Check `folder_prefix` in EXTEND.md:
+   - **If `folder_prefix` is empty/unset**:
+     Construct `{base_dir}/{domain}/{slug}/{slug}.md` — each URL gets its own directory so media files stay isolated.
+   - **If `folder_prefix` is set** (e.g., `learncpp-chapter-0-getting-started-`):
+     - Omit the `{domain}/` intermediate directory.
+     - After fetching (or when the page title is known), check if the page `title` in frontmatter starts with a chapter/lesson number like `X.Y — ...` (e.g., `0.4 — Introduction to C++ development`).
+     - If `X.Y` is present and `folder_prefix` does not already include the lesson number, set `{folder_name}` = `{folder_prefix}{Y}-{slug}` (e.g., `learncpp-chapter-0-getting-started-4-introduction-to-c-development`); otherwise set `{folder_name}` = `{folder_prefix}{slug}`.
+     - Final path: `{base_dir}/{folder_name}/{slug}.md` (if `fetch` initially wrote to `{base_dir}/{folder_prefix}{slug}/{slug}.md` before the page title was known, automatically `mv` the directory to `{base_dir}/{folder_name}` **before** prompting or running `--download-media`).
+5. Conflict resolution: append timestamp `{folder_name}-YYYYMMDD-HHMMSS/{slug}-YYYYMMDD-HHMMSS.md`
 
 Pass the constructed path to `--output`. Media files (`--download-media`) are saved into subdirectories next to the markdown file, keeping each URL's assets self-contained.
 
