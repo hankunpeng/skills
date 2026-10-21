@@ -78,6 +78,13 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill playwright-use-chrome
   ```
 
+### 11. URL to Obsidian (`url-to-obsidian`)
+* **Description**: Fetch any URL and convert it to clean, ad-free Obsidian Markdown or structured JSON using Chrome CDP with network-level ad blocking, DOM/Shadow-DOM ad widget purification, semantic heading normalization, and native Obsidian Callout (`> [!TYPE] Title`) conversion.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/skills --skill url-to-obsidian
+  ```
+
 
 ---
 

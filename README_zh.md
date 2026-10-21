@@ -78,6 +78,13 @@
   npx skills add hankunpeng/skills --skill playwright-use-chrome
   ```
 
+### 11. 网页转 Obsidian 笔记 (`url-to-obsidian`)
+* **说明**：基于 Chrome CDP 与多层级去广告引擎（CDP 网络层广告域名拦截、DOM/Shadow-DOM 视频与原生广告清洗、伪标题层级归一化），将任意网页抓取并转换为无广告、支持原生 Obsidian Callout（`> [!TYPE] 标题`）格式的 Markdown 笔记或结构化 JSON。
+* **安装**：
+  ```bash
+  npx skills add hankunpeng/skills --skill url-to-obsidian
+  ```
+
 
 ---
 
