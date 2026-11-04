@@ -42,8 +42,8 @@ HALFWIDTH_PUNC = {
 }
 
 def mask_line(line):
-    # Mask URLs: replace http://... or https://... with spaces of same length
-    url_pattern = re.compile(r'https?://[^\s)\]]+')
+    # Mask URLs: replace http://... or https://... or file://... with spaces of same length
+    url_pattern = re.compile(r'(?:https?|file)://[^\s)\]]+')
     masked = line
     for m in url_pattern.finditer(line):
         start, end = m.span()
@@ -74,10 +74,15 @@ def lint_file(file_path, fix=False):
     # Regex definitions
     cjk_char = r'[\u4e00-\u9fff]'
     latin_or_num = r'[a-zA-Z0-9]'
+    opening_punc = r'[（\(“‘「『《〈【〔\[\{"]'
+    closing_punc = r'[）\)”’」』》〉】〕\]\}！？!?。，,；;：:]'
 
     # 1. CJK and Latin spacing (CJK followed by Latin/Backtick, or Latin/Backtick followed by CJK)
     pattern_cjk_latin = re.compile(rf'({cjk_char})({latin_or_num}|`)')
     pattern_latin_cjk = re.compile(rf'({latin_or_num}|`)({cjk_char})')
+
+    # 1b. Markdown emphasis spans (**...** or *...*) spacing and CommonMark delimiter defense
+    pattern_emphasis = re.compile(r'(?<!\*)(\*\*|\*)(?!\s)([^\*\n]+?)(?<!\s)\1(?!\*)')
 
     # 2. Number and physical unit spacing (e.g., 10Gbps -> 10 Gbps)
     pattern_num_unit = re.compile(r'(\d+)(Gbps|Mbps|TB|GB|MB|KB|B|GHz|MHz|Hz|px|em|rem|vh|vw|s|ms|mm|cm|m|km|μm|um|nm|μs|us|ns|kg|g|mg|μg|ug|L|mL|μL|uL|oz|lb)\b', re.IGNORECASE)
@@ -149,6 +154,56 @@ def lint_file(file_path, fix=False):
                 current_line = current_line[:m.start()] + f"{latin} {cjk}" + current_line[m.end():]
                 masked_line = masked_line[:m.start()] + f"{latin} {cjk}" + masked_line[m.end():]
                 line_modified = True
+
+        # --- A2. Spacing around Markdown Emphasis Spans (**...** or *...*) ---
+        matches = list(pattern_emphasis.finditer(masked_line))
+        for m in reversed(matches):
+            inner = m.group(2)
+            start, end = m.span()
+            prev_char = current_line[start - 1] if start > 0 else ''
+            next_char = current_line[end] if end < len(current_line) else ''
+
+            has_latin_or_num = bool(re.search(r'[a-zA-Z0-9]', inner))
+            starts_with_punc = bool(re.search(f'^{opening_punc}', inner))
+            ends_with_punc = bool(re.search(f'{closing_punc}$', inner))
+            starts_with_cjk = bool(re.search(f'^{cjk_char}', inner))
+            ends_with_cjk = bool(re.search(f'{cjk_char}$', inner))
+
+            need_before = False
+            if prev_char:
+                if re.match(cjk_char, prev_char):
+                    if has_latin_or_num or starts_with_punc:
+                        need_before = True
+                elif re.match(latin_or_num, prev_char):
+                    if starts_with_cjk or starts_with_punc:
+                        need_before = True
+
+            need_after = False
+            if next_char:
+                if re.match(cjk_char, next_char):
+                    if has_latin_or_num or ends_with_punc:
+                        need_after = True
+                elif re.match(latin_or_num, next_char):
+                    if ends_with_cjk or ends_with_punc:
+                        need_after = True
+
+            if need_before or need_after:
+                col_num = start + 1
+                replacement = (' ' if need_before else '') + current_line[start:end] + (' ' if need_after else '')
+                if starts_with_punc or ends_with_punc:
+                    msg = f"Missing space around Markdown emphasis '{m.group(0)}' with boundary punctuation next to CJK (avoids CommonMark delimiter failure)"
+                else:
+                    msg = f"Missing space around Markdown emphasis '{m.group(0)}' containing Latin/Numbers next to CJK"
+
+                errors.append({
+                    'line': line_num, 'col': col_num,
+                    'msg': msg,
+                    'suggest': replacement.strip()
+                })
+                if fix:
+                    current_line = current_line[:start] + replacement + current_line[end:]
+                    masked_line = masked_line[:start] + replacement + masked_line[end:]
+                    line_modified = True
 
         # --- B. Spacing between Numbers and Units ---
         matches = list(pattern_num_unit.finditer(masked_line))

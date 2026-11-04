@@ -22,6 +22,8 @@ Use this skill when you need to:
    - Must not have a space between numbers and degree/percentage symbols (e.g., `90°`, `15%`).
    - Must not have spaces before or after fullwidth punctuation in Chinese text.
    - Must have a space before and after range tilde `~` (e.g., `50 Hz ~ 8000 Hz`).
+   - Must have a space between CJK characters and Markdown emphasis spans (`**` or `*`) when the emphasized text contains Latin/numeric characters (e.g., `使用 **React** 开发`).
+   - Must have a space between Markdown emphasis spans and adjacent CJK characters when the emphasis boundary has punctuation (e.g., `受自然界 **河流（Cobblestone）** 启发` or `注意 **（重要提醒）** 必须`), preventing CommonMark/GFM delimiter parsing failure.
 2. **Punctuation (标点)**:
    - Must use fullwidth punctuation in Chinese text (e.g. `！`, `，`, `？`).
    - Must not duplicate punctuation (e.g. avoid `！！`, `？？`).
@@ -31,6 +33,9 @@ Use this skill when you need to:
    - Must use halfwidth numbers (e.g. `1234` instead of `１２３４`).
 4. **Casing (大小写)**:
    - Proper capitalization of technology names (e.g. `GitHub`, `TypeScript`, `JavaScript`, `Next.js`, `React`, `HTML5`, `CSS3`, `VS Code`, `Node.js`, `iPhone`, `MacBook`, `iPad`, `LeanCloud`).
+5. **Markdown Emphasis (强调与行内样式)**:
+   - Must preserve valid CommonMark / GFM delimiter runs when combining punctuation, Latin text, and CJK characters.
+   - Must ensure bold/italic markers are properly spaced so that trailing fullwidth/halfwidth parentheses or punctuation do not cause the right-flanking delimiter run to fail in CommonMark.
 
 ## How to execute the Linter
 
