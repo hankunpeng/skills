@@ -85,6 +85,13 @@
   npx skills add hankunpeng/skills --skill url-to-obsidian
   ```
 
+### 12. 智能提交与推送 (`cap`)
+* **说明**：具备上下文与依赖感知的 Commit And Push 快捷工作流。自动将指定文件（或当前会话刚修改的文件）及其内部引用的本地配套资源（如博客文章关联的 `assets/img/posts/<slug>/` 配图目录）一并暂存，严格隔离工作区其他无关改动，按 Conventional Commits 规范校验提交信息后一键完成 `commit` 与 `push`。
+* **安装**：
+  ```bash
+  npx skills add hankunpeng/skills --skill cap
+  ```
+
 
 ---
 
