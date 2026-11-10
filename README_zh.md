@@ -30,7 +30,7 @@
   ```
 
 ### 4. Antigravity CLI 状态栏定制 (`antigravity-cli-statusline`)
-* **说明**：定制 Antigravity CLI 的状态栏，显示文件夹图标、家目录缩写的当前工作目录、模型名称，以及 5 小时/7 天的 Token 配额使用情况（带实时刷新倒计时）。
+* **说明**：将 Antigravity CLI 状态栏重构为紧凑的单行布局，在单行内优雅整合快捷键提示、工作目录、当前模型、上下文消耗与 5 小时/7 天 Token 配额（带实时刷新倒计时与自适应宽度保护）。
 * **安装**：
   ```bash
   npx skills add hankunpeng/skills --skill antigravity-cli-statusline

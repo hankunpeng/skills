@@ -30,7 +30,7 @@ This repository contains the following skills:
   ```
 
 ### 4. Antigravity CLI Statusline (`antigravity-cli-statusline`)
-* **Description**: Customizes the Antigravity CLI status bar to show folder icons, home-abbreviated current working directory, model name, and 5H/7D token quota usage with live refresh countdown.
+* **Description**: Customizes the Antigravity CLI status bar into a unified single-line layout showing shortcuts, folder icons, cwd, active model, context tokens, and 5H/7D token quota usage with live countdown.
 * **Installation**:
   ```bash
   npx skills add hankunpeng/skills --skill antigravity-cli-statusline
