@@ -2,6 +2,12 @@
 
 ## ✅ 正确格式
 
+### 项目初始化（自定义 `init` 类型）
+```
+init: add initial project structure
+init(config): add shared Codex instructions
+```
+
 ### 简单 feature
 ```
 feat: add dark mode toggle
@@ -51,6 +57,7 @@ Co-authored-by: Bob <bob@example.com>
 
 ### 各类型示例一览
 ```
+init: add initial project structure
 docs: update API reference for v3 endpoints
 style: fix indentation in auth module
 refactor: extract validation logic into shared util
@@ -94,7 +101,7 @@ feat(auth):
 ```
 feature(auth): add login
 ```
-> `feature` 不是合法类型，应使用 `feat`
+> 本工具不支持 `feature` 类型；新增功能应使用 `feat`
 
 ### description 首字母大写（不推荐）
 ```

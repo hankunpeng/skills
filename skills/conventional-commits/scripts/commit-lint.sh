@@ -23,8 +23,8 @@ if [ -z "$FIRST_LINE" ]; then
 fi
 
 # Regex pattern for conventional commit message header
-# Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
-PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9._/-]+\))?!?: .+$"
+# Types: init, feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+PATTERN="^(init|feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9._/-]+\))?!?: .+$"
 
 if [[ "$FIRST_LINE" =~ $PATTERN ]]; then
   echo "✔ Commit message style is valid!"
@@ -32,7 +32,7 @@ if [[ "$FIRST_LINE" =~ $PATTERN ]]; then
 else
   echo "✗ Invalid commit message format."
   echo "Expected: <type>[optional scope]: <description>"
-  echo "Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+  echo "Types: init, feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
   echo "Example: feat(auth): add google sign-in"
   exit 1
 fi

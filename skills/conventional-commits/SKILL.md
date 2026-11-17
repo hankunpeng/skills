@@ -32,6 +32,9 @@ This skill enforces, validates, and manages Conventional Commits inside reposito
 
 ### Types
 
+The linter accepts the types below. `init` is a custom type for initial repository or project setup; Conventional Commits allows projects to define additional types.
+
+- `init`: Initial setup of a repository or project.
 - `feat`: A new feature for the user.
 - `fix`: A bug fix for the user.
 - `docs`: Documentation changes.

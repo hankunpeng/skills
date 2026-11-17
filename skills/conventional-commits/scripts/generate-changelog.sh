@@ -69,6 +69,9 @@ print_section() {
   fi
 }
 
+# Initial setup
+print_section "init"     "Initialization"
+
 # Features & Fixes
 print_section "feat"     "Features"
 print_section "fix"      "Bug Fixes"

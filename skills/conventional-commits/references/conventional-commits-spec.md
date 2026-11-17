@@ -24,7 +24,7 @@ Conventional Commits 是一种轻量级的提交消息约定，为提交历史�
 
 ### 规则
 
-1. **type** 是必需的，必须是以下之一：`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`（详细说明见下表）。
+1. **type** 是必需的。官方规范允许自定义类型；本工具的检查器支持以下类型：`init`, `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`（详细说明见下表）。
 2. **scope** 是可选的，用圆括号括起来，提供上下文信息（如模块名、组件名）。
 3. **`!`** 放在 `:` 前面，表示这是一个 breaking change。
 4. **description** 是必需的，紧跟在 `: ` 之后，简明描述本次变更。
@@ -35,10 +35,11 @@ Conventional Commits 是一种轻量级的提交消息约定，为提交历史�
 
 ## 核心与常用类型 (Type)
 
-约定式提交将修改划分为了不同的类型，以便于快速筛选历史以及自动化分析：
+约定式提交通过类型便于快速筛选历史及自动化分析。下面列出本工具支持的类型，其中 `init` 是用于仓库或项目初始化的自定义类型。
 
 | 类型 | 说明 | 示例 | 对应的语义化版本变化 |
 | :--- | :--- | :--- | :--- |
+| **`init`** | 仓库或项目初始化（本工具自定义类型） | `init: add initial project structure` | 无（本身不触发版本递增） |
 | **`feat`** | 引入全新的功能 | `feat(auth): add google login` | **Minor (次版本)** |
 | **`fix`** | 修复已有的 Bug | `fix(api): resolve timeout issue` | **Patch (修订号)** |
 | **`docs`** | 仅修改文档、说明文件等 | `docs: update conventional commits guide` | 无（通常不升级版本） |
