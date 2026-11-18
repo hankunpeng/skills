@@ -14,7 +14,7 @@ This skill allows configuring, installing, or updating the custom status bar con
   - **Right Side**: Displays `📂 <cwd> | ● <model> | 📜 <context> | ⏳ <5H timer> | 5H: <%> | ⏳ <7D timer> | 7D: <%>`.
 - **Adaptive Responsive Width**: Dynamically adapts to terminal widths from 80 to 160+ columns without wrapping into multiple lines.
 - **Directory Emoji**: Prepend `📂` with home-abbreviated path (`~/...`).
-- **Token Quota Display**: Displays 5H (5-hour) and 7D (weekly) remaining fraction percentages with dynamic color coding (Microsoft palette).
+- **Token Quota Display**: Displays available 5H (5-hour) and 7D (weekly) remaining fraction percentages with dynamic color coding (Microsoft palette), automatically mapping standard Gemini models (`gemini-*`), Gemini 4 Argon / Orchestrator (`gemini-argon-wtu-weekly`), and third-party models (`3p-*`) while omitting unavailable windows.
 - **Live Refresh Countdown**: Displays live countdowns (`⏳ Xh Ym` / `⏳ Xd Yh` or `⌛ 0h Ym`) for reset times.
 - **Auto-Refresh**: Configures the status line to update every 60 seconds.
 

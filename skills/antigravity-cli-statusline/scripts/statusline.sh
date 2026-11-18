@@ -8,52 +8,81 @@ model_name=$(echo "$JSON_INPUT" | jq -r '.model.display_name // "Gemini"')
 terminal_width=$(echo "$JSON_INPUT" | jq -r '.terminal_width // 80')
 agent_state=$(echo "$JSON_INPUT" | jq -r '.agent_state // "idle"')
 
-# Determine the quota prefix based on the model name
-if [[ "$model_name" =~ [Gg]emini ]]; then
-  quota_prefix="gemini"
+# Determine the quota group based on the model name
+if [[ "$model_name" =~ [Aa]rgon ]]; then
+  quota_group="argon"
+elif [[ "$model_name" =~ [Cc]laude|[Ss]onnet|[Oo]pus|[Hh]aiku|[Gg][Pp][Tt]|[Oo][Ss][Ss]|3[Pp] ]]; then
+  quota_group="3p"
 else
-  quota_prefix="3p"
+  quota_group="gemini"
 fi
 
-# 计算 5H 和 7D 的剩余百分比并取整
-quota_5h_pct=$(echo "$JSON_INPUT" | jq -r ".quota[\"${quota_prefix}-5h\"].remaining_fraction // 1 | . * 100 | round")
-quota_weekly_pct=$(echo "$JSON_INPUT" | jq -r ".quota[\"${quota_prefix}-weekly\"].remaining_fraction // 1 | . * 100 | round")
+case "$quota_group" in
+  argon)
+    bucket_5h_expr='.quota["gemini-argon-wtu-5h"] // .quota["gemini-argon-5h"] // ([.quota // {} | to_entries[] | select(.key | test("argon.*5h$")) | .value][0])'
+    bucket_weekly_expr='.quota["gemini-argon-wtu-weekly"] // .quota["gemini-argon-weekly"] // ([.quota // {} | to_entries[] | select(.key | test("argon.*weekly$")) | .value][0])'
+    ;;
+  3p)
+    bucket_5h_expr='.quota["3p-5h"]'
+    bucket_weekly_expr='.quota["3p-weekly"]'
+    ;;
+  *)
+    bucket_5h_expr='.quota["gemini-5h"]'
+    bucket_weekly_expr='.quota["gemini-weekly"]'
+    ;;
+esac
 
-# 解析 5H 刷新时间
-quota_5h_reset_sec=$(echo "$JSON_INPUT" | jq -r ".quota[\"${quota_prefix}-5h\"].reset_in_seconds // 0")
-if [ "$quota_5h_reset_sec" -gt 0 ]; then
-  hours_5h=$((quota_5h_reset_sec / 3600))
-  minutes_5h=$(((quota_5h_reset_sec % 3600) / 60))
-  if [ "$hours_5h" -lt 1 ]; then
-    emoji_5h="⌛"
+# 解析 5H 配额与刷新时间（仅当对应 bucket 存在时显示）
+has_5h_quota=$(echo "$JSON_INPUT" | jq -r "if (${bucket_5h_expr}) != null then 1 else 0 end")
+if [ "$has_5h_quota" -eq 1 ]; then
+  quota_5h_pct=$(echo "$JSON_INPUT" | jq -r "(${bucket_5h_expr}).remaining_fraction // 0 | . * 100 | round")
+  quota_5h_reset_sec=$(echo "$JSON_INPUT" | jq -r "(${bucket_5h_expr}).reset_in_seconds // 0")
+  if [ "$quota_5h_reset_sec" -gt 0 ]; then
+    hours_5h=$((quota_5h_reset_sec / 3600))
+    minutes_5h=$(((quota_5h_reset_sec % 3600) / 60))
+    if [ "$hours_5h" -lt 1 ]; then
+      emoji_5h="⌛"
+    else
+      emoji_5h="⏳"
+    fi
+    has_5h_timer=1
+    time_5h_str="${hours_5h}h ${minutes_5h}m"
   else
-    emoji_5h="⏳"
+    has_5h_timer=0
+    time_5h_str=""
   fi
-  has_5h_timer=1
-  time_5h_str="${hours_5h}h ${minutes_5h}m"
 else
+  quota_5h_pct=0
   has_5h_timer=0
   time_5h_str=""
 fi
 
-# 解析 Weekly (7D) 刷新时间
-quota_weekly_reset_sec=$(echo "$JSON_INPUT" | jq -r ".quota[\"${quota_prefix}-weekly\"].reset_in_seconds // 0")
-if [ "$quota_weekly_reset_sec" -gt 0 ]; then
-  weekly_days=$((quota_weekly_reset_sec / 86400))
-  weekly_hours=$(((quota_weekly_reset_sec % 86400) / 3600))
-  weekly_minutes=$(((quota_weekly_reset_sec % 3600) / 60))
-  if [ "$weekly_days" -gt 0 ]; then
-    weekly_time_str="${weekly_days}d ${weekly_hours}h"
+# 解析 Weekly (7D) 配额与刷新时间（仅当对应 bucket 存在时显示）
+has_weekly_quota=$(echo "$JSON_INPUT" | jq -r "if (${bucket_weekly_expr}) != null then 1 else 0 end")
+if [ "$has_weekly_quota" -eq 1 ]; then
+  quota_weekly_pct=$(echo "$JSON_INPUT" | jq -r "(${bucket_weekly_expr}).remaining_fraction // 0 | . * 100 | round")
+  quota_weekly_reset_sec=$(echo "$JSON_INPUT" | jq -r "(${bucket_weekly_expr}).reset_in_seconds // 0")
+  if [ "$quota_weekly_reset_sec" -gt 0 ]; then
+    weekly_days=$((quota_weekly_reset_sec / 86400))
+    weekly_hours=$(((quota_weekly_reset_sec % 86400) / 3600))
+    weekly_minutes=$(((quota_weekly_reset_sec % 3600) / 60))
+    if [ "$weekly_days" -gt 0 ]; then
+      weekly_time_str="${weekly_days}d ${weekly_hours}h"
+    else
+      weekly_time_str="${weekly_hours}h ${weekly_minutes}m"
+    fi
+    if [ $((quota_weekly_reset_sec / 3600)) -lt 1 ]; then
+      emoji_weekly="⌛"
+    else
+      emoji_weekly="⏳"
+    fi
+    has_weekly_timer=1
   else
-    weekly_time_str="${weekly_hours}h ${weekly_minutes}m"
+    has_weekly_timer=0
+    weekly_time_str=""
   fi
-  if [ $((quota_weekly_reset_sec / 3600)) -lt 1 ]; then
-    emoji_weekly="⌛"
-  else
-    emoji_weekly="⏳"
-  fi
-  has_weekly_timer=1
 else
+  quota_weekly_pct=0
   has_weekly_timer=0
   weekly_time_str=""
 fi
@@ -143,20 +172,29 @@ build_right() {
   else
     p_ctx="📜 ${context_used_pct}%"
   fi
-  local p_5h
-  if [ "$show_5h_timer" -eq 1 ]; then
-    p_5h="${emoji_5h} ${time_5h_str} | 5H: ${quota_5h_pct}%"
-  else
-    p_5h="5H: ${quota_5h_pct}%"
-  fi
-  local p_weekly
-  if [ "$show_weekly_timer" -eq 1 ]; then
-    p_weekly="${emoji_weekly} ${weekly_time_str} | 7D: ${quota_weekly_pct}%"
-  else
-    p_weekly="7D: ${quota_weekly_pct}%"
+  local result="${p_cwd} | ${p_model} | ${p_ctx}"
+
+  if [ "$has_5h_quota" -eq 1 ]; then
+    local p_5h
+    if [ "$show_5h_timer" -eq 1 ]; then
+      p_5h="${emoji_5h} ${time_5h_str} | 5H: ${quota_5h_pct}%"
+    else
+      p_5h="5H: ${quota_5h_pct}%"
+    fi
+    result="${result} | ${p_5h}"
   fi
 
-  echo "${p_cwd} | ${p_model} | ${p_ctx} | ${p_5h} | ${p_weekly}"
+  if [ "$has_weekly_quota" -eq 1 ]; then
+    local p_weekly
+    if [ "$show_weekly_timer" -eq 1 ]; then
+      p_weekly="${emoji_weekly} ${weekly_time_str} | 7D: ${quota_weekly_pct}%"
+    else
+      p_weekly="7D: ${quota_weekly_pct}%"
+    fi
+    result="${result} | ${p_weekly}"
+  fi
+
+  echo "$result"
 }
 
 plain_right=$(build_right)
@@ -228,19 +266,25 @@ else
   colored_ctx="${color_context}📜 ${context_used_pct}%\033[0m"
 fi
 
-if [ "$show_5h_timer" -eq 1 ]; then
-  colored_5h="${emoji_5h} ${time_5h_str} ${SEP_COLOR} ${color_5h}5H: ${quota_5h_pct}%\033[0m"
-else
-  colored_5h="${color_5h}5H: ${quota_5h_pct}%\033[0m"
+right_colored="${colored_cwd} ${SEP_COLOR} ${colored_model} ${SEP_COLOR} ${colored_ctx}"
+
+if [ "$has_5h_quota" -eq 1 ]; then
+  if [ "$show_5h_timer" -eq 1 ]; then
+    colored_5h="${emoji_5h} ${time_5h_str} ${SEP_COLOR} ${color_5h}5H: ${quota_5h_pct}%\033[0m"
+  else
+    colored_5h="${color_5h}5H: ${quota_5h_pct}%\033[0m"
+  fi
+  right_colored="${right_colored} ${SEP_COLOR} ${colored_5h}"
 fi
 
-if [ "$show_weekly_timer" -eq 1 ]; then
-  colored_weekly="${emoji_weekly} ${weekly_time_str} ${SEP_COLOR} ${color_weekly}7D: ${quota_weekly_pct}%\033[0m"
-else
-  colored_weekly="${color_weekly}7D: ${quota_weekly_pct}%\033[0m"
+if [ "$has_weekly_quota" -eq 1 ]; then
+  if [ "$show_weekly_timer" -eq 1 ]; then
+    colored_weekly="${emoji_weekly} ${weekly_time_str} ${SEP_COLOR} ${color_weekly}7D: ${quota_weekly_pct}%\033[0m"
+  else
+    colored_weekly="${color_weekly}7D: ${quota_weekly_pct}%\033[0m"
+  fi
+  right_colored="${right_colored} ${SEP_COLOR} ${colored_weekly}"
 fi
-
-right_colored="${colored_cwd} ${SEP_COLOR} ${colored_model} ${SEP_COLOR} ${colored_ctx} ${SEP_COLOR} ${colored_5h} ${SEP_COLOR} ${colored_weekly}"
 
 # 输出唯一的单行状态栏
 printf "\033[90m%s\033[0m%s%b\n" "$left_text" "$padding" "$right_colored"
