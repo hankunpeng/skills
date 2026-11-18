@@ -58,7 +58,7 @@ This repository contains the following skills:
   ```
 
 ### 8. Explain Like I'm 5 (`eli5`)
-* **Description**: Explain complex topics in simple, intuitive terms using bilingual English and Chinese (line-by-line format) and visual HTML artifacts.
+* **Description**: Explain complex topics in simple, intuitive English using clean HTML artifacts with playable micro-demos and a quick knowledge check.
 * **Installation**:
   ```bash
   npx skills add hankunpeng/skills --skill eli5
@@ -90,6 +90,13 @@ This repository contains the following skills:
 * **Installation**:
   ```bash
   npx skills add hankunpeng/skills --skill cap
+  ```
+
+### 13. Explain Like I'm 5 in Chinese (`eli5c`)
+* **Description**: Explain complex topics in simple, idiomatic Chinese using clean HTML artifacts with playable micro-demos and a quick knowledge check.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/skills --skill eli5c
   ```
 
 

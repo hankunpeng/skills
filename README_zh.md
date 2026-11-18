@@ -57,8 +57,8 @@
   npx skills add hankunpeng/skills --skill semver-recommender
   ```
 
-### 8. 深入浅出通俗解释 (`eli5`)
-* **说明**：用通俗易懂的语言解释复杂主题，提供英中双语对照（一行英文一行中文）及图文并茂的 HTML Artifact。
+### 8. 深入浅出英文通俗解释 (`eli5`)
+* **说明**：用通俗易懂的地道英文解释复杂主题，输出内置可玩微交互演示与秒懂自测题的清晰 HTML Artifact。
 * **安装**：
   ```bash
   npx skills add hankunpeng/skills --skill eli5
@@ -90,6 +90,13 @@
 * **安装**：
   ```bash
   npx skills add hankunpeng/skills --skill cap
+  ```
+
+### 13. 深入浅出中文通俗解释 (`eli5c`)
+* **说明**：用通俗易懂的地道中文解释复杂主题，输出内置可玩微交互演示与秒懂自测题的清晰 HTML Artifact。
+* **安装**：
+  ```bash
+  npx skills add hankunpeng/skills --skill eli5c
   ```
 
 
