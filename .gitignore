@@ -11,9 +11,15 @@ __pycache__/
 .DS_Store
 
 # AI assistant files
+.agy-resume
+.codex-resume
+.qoder-resume
 .agents/
 .claude/
 .gemini/
+.qoder/
+.qodercn/
+.workbuddy/
 
 # IDE files
 .idea/
