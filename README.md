@@ -99,6 +99,14 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill eli5c
   ```
 
+### 14. GitHub Flavored Markdown (`gfm`)
+
+Write a document in GitHub Flavored Markdown with `$gfm Write a document about…`.
+
+```bash
+npx skills add hankunpeng/skills --skill gfm
+```
+
 
 ---
 

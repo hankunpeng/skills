@@ -99,6 +99,14 @@
   npx skills add hankunpeng/skills --skill eli5c
   ```
 
+### 14. GitHub Flavored Markdown (`gfm`)
+
+输入 `$gfm 写一份关于……的文档`，即可用 GitHub Flavored Markdown 撰写文档。
+
+```bash
+npx skills add hankunpeng/skills --skill gfm
+```
+
 
 ---
 
