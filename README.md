@@ -107,6 +107,14 @@ Write a document in GitHub Flavored Markdown with `$gfm Write a document aboutâ€
 npx skills add hankunpeng/skills --skill gfm
 ```
 
+### 15. Obsidian Flavored Markdown (`ofm`)
+
+Use `$ofm` to select Obsidian Flavored Markdown, then say what to do. For example, `$ofm Summarize the discussion above` replies in chat, and `$ofm Save the discussion above as meeting-notes.md` writes a file.
+
+```bash
+npx skills add hankunpeng/skills --skill ofm
+```
+
 
 ---
 

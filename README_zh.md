@@ -107,6 +107,14 @@
 npx skills add hankunpeng/skills --skill gfm
 ```
 
+### 15. Obsidian Flavored Markdown (`ofm`)
+
+用 `$ofm` 指定 Obsidian Flavored Markdown 格式，后面的自然语言决定具体动作。例如，`$ofm 总结上面的讨论` 会在对话中给出总结，`$ofm 把上面的讨论保存为 meeting-notes.md` 会写入文件。
+
+```bash
+npx skills add hankunpeng/skills --skill ofm
+```
+
 
 ---
 
