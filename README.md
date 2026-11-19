@@ -115,6 +115,14 @@ Use `$ofm` to select Obsidian Flavored Markdown, then say what to do. For exampl
 npx skills add hankunpeng/skills --skill ofm
 ```
 
+### 16. Codex Session Cleanup (`csc`)
+
+Run `$csc` to preview the active sessions in the current working directory’s `/resume` list. Use `$csc Delete the other active sessions in this directory and keep this session` to permanently delete the other sessions. Requires Python 3.8 or later and a local Codex CLI with `thread/delete` support.
+
+```bash
+npx skills add hankunpeng/skills --skill csc
+```
+
 
 ---
 

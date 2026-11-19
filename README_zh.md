@@ -115,6 +115,14 @@ npx skills add hankunpeng/skills --skill gfm
 npx skills add hankunpeng/skills --skill ofm
 ```
 
+### 16. Codex 会话清理 (`csc`)
+
+输入 `$csc` 可预览当前工作目录 `/resume` 列表中的活动会话。输入 `$csc 删除当前目录中除当前会话外的其他活动会话` 可永久删除这些会话。需要 Python 3.8 或更新版本，以及支持 `thread/delete` 的本地 Codex CLI。
+
+```bash
+npx skills add hankunpeng/skills --skill csc
+```
+
 
 ---
 
