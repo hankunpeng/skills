@@ -22,11 +22,11 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill twitter
   ```
 
-### 3. Conventional Commits (`conventional-commits`)
+### 3. Conventional Commits (`cc`)
 * **Description**: Enforce, validate, lint, and manage Conventional Commits across git repositories. Generates semantic changelogs and installs git hooks.
 * **Installation**:
   ```bash
-  npx skills add hankunpeng/skills --skill conventional-commits
+  npx skills add hankunpeng/skills --skill cc
   ```
 
 ### 4. Antigravity CLI Statusline (`antigravity-cli-statusline`)

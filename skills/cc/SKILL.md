@@ -1,5 +1,5 @@
 ---
-name: conventional-commits
+name: cc
 description: Enforce, validate, lint, and manage Conventional Commits across git repositories. Generates semantic changelogs and installs git hooks. Use this skill whenever the user mentions commit messages, commit conventions, conventional commits, semantic versioning, changelogs, commit linting, git hooks for commits, or wants to standardize their commit format — even if they don't explicitly say "conventional commits".
 ---
 

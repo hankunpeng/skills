@@ -22,11 +22,11 @@
   npx skills add hankunpeng/skills --skill twitter
   ```
 
-### 3. 约定式提交规范 (`conventional-commits`)
+### 3. 约定式提交规范 (`cc`)
 * **说明**：在 Git 仓库中强制执行、验证、检查和管理约定式提交（Conventional Commits）。自动生成语义化变更日志并安装 Git Hooks。
 * **安装**：
   ```bash
-  npx skills add hankunpeng/skills --skill conventional-commits
+  npx skills add hankunpeng/skills --skill cc
   ```
 
 ### 4. Antigravity CLI 状态栏定制 (`antigravity-cli-statusline`)
