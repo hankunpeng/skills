@@ -1,5 +1,5 @@
 {
-  "skill_name": "semver-recommender",
+  "skill_name": "svr",
   "evals": [
     {
       "id": 1,
@@ -20,8 +20,8 @@
     {
       "id": 2,
       "name": "backward-compatible-new-feature",
-      "prompt": "我们在卫星轨道应用中新增了一个可选的天气云层渲染图层 `addCloudLayer(opacity = 0.5)`，所有原有 API 和调用方式完全保持向下兼容。当前版本是 v1.4.2，并且准备调用 `node build.js xj-v1.html` 打包，请推荐下一个版本号和打包命令。",
-      "expected_output": "应推荐 MINOR 升级（v1.5.0），并在后续操作中建议执行打包命令形如 `node build.js xj-v1.html -o ... -v 1.5.0`。",
+      "prompt": "我们在卫星轨道应用中新增了一个可选的天气云层渲染图层 `addCloudLayer(opacity = 0.5)`，所有原有 API 和调用方式完全保持向下兼容。当前版本是 v1.4.2。构建脚本已确认用法为 `node build.js <input.html> -v <version>`，输入文件是 `xj-v1.html`。请推荐下一个版本号和打包命令。",
+      "expected_output": "应推荐 MINOR 升级（v1.5.0），并给出 `node build.js xj-v1.html -v 1.5.0`。",
       "assertions": [
         {
           "text": "推荐升级类型为 MINOR",
@@ -29,7 +29,7 @@
         },
         {
           "text": "提供了构建与发布命令联动建议",
-          "target": "build.js"
+          "target": "node build.js xj-v1.html -v 1.5.0"
         }
       ]
     },
@@ -46,6 +46,30 @@
         {
           "text": "识别出无破坏性变更且无新公开 API",
           "target": "PATCH"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "reverted-breaking-change",
+      "prompt": "发布基线是 v1.8.0，之后一条 `feat(api)!: remove legacy mode` 提交删了旧模式，下一条提交完整撤回，基线到候选版本的文件树完全一致。需要升哪个版本？",
+      "expected_output": "说明净变更为空，这个范围无需升版，并指出破坏性提交在候选版本中已被撤回。",
+      "assertions": [
+        {
+          "text": "根据发布基线到候选版本的净差异判断无需升版。",
+          "target": "净变更"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "published-baseline-over-planned-manifest",
+      "prompt": "这个单包项目最后一次正式发布是 v1.2.3，工作区的 package.json 已提前写成 2.0.0。从发布标签到候选版本只新增了一个向下兼容的公开参数，请推荐版本。",
+      "expected_output": "以已发布的 v1.2.3 为基线，推荐 MINOR 升级到 v1.3.0，说明工作区版本号是计划值。",
+      "assertions": [
+        {
+          "text": "使用已发布版本作为基线，并给出向下兼容新功能对应的次版本。",
+          "target": "v1.3.0"
         }
       ]
     }

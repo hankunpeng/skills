@@ -50,11 +50,11 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill llama-parse
   ```
 
-### 7. Semantic Version Recommender (`semver-recommender`)
+### 7. Semantic Version Recommender (`svr`)
 * **Description**: Intelligently analyze code changes, API contract diffs, and commit history to recommend the next Semantic Version (SemVer MAJOR, MINOR, or PATCH) with concrete rationales and breaking change detection.
 * **Installation**:
   ```bash
-  npx skills add hankunpeng/skills --skill semver-recommender
+  npx skills add hankunpeng/skills --skill svr
   ```
 
 ### 8. Explain Like I'm 5 (`eli5`)
