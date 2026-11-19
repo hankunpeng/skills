@@ -85,11 +85,11 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill url-to-obsidian
   ```
 
-### 12. Smart Commit And Push (`cap`)
+### 12. Conventional Commit and Push (`ccp`)
 * **Description**: Context-aware Commit And Push workflow. Automatically stages specified or recently modified target files along with their referenced companion assets (e.g., blog post images in `assets/img/posts/<slug>/`), validates the commit message against Conventional Commits, commits, and pushes to remote while isolating unrelated changes.
 * **Installation**:
   ```bash
-  npx skills add hankunpeng/skills --skill cap
+  npx skills add hankunpeng/skills --skill ccp
   ```
 
 ### 13. Explain Like I'm 5 in Chinese (`eli5c`)
