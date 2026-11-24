@@ -125,7 +125,7 @@ npx skills add hankunpeng/skills --skill csc
 
 ### 17. In Your Own Words (`yw`)
 
-Use `$yw` or `/yw` to have the agent restate the problem, goal, and key boundaries in its own words and wait for confirmation before making changes. Pass a new request (`$yw Refactor token refresh…`) or run bare `$yw` to align on the discussion so far.
+Use `$yw` or `/yw` to have the agent restate the problem, goal, and key boundaries in its own words and wait for confirmation before making changes. Pass a new request (`$yw Refactor token refresh…`) or run bare `$yw` to align on the discussion so far; add an ISO 639-1 language flag right after `$yw` / `/yw` (for example, `$yw -zh <issue>` or `/yw -en`; `zh` defaults to Simplified Chinese and `en` to American English) to specify the output language.
 
 ```bash
 npx skills add hankunpeng/skills --skill yw
