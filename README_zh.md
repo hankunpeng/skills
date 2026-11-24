@@ -123,6 +123,14 @@ npx skills add hankunpeng/skills --skill ofm
 npx skills add hankunpeng/skills --skill csc
 ```
 
+### 17. 需求复述对齐 (`yw`)
+
+输入 `$yw` 或 `/yw`，让 Agent 先用自己的话复述要解决的问题、期望目标与关键边界，并停下等待确认后再动手修改。既可以附带新需求（如 `$yw 重构登录态刷新逻辑`），也可以在讨论后单独发送 `$yw` 对齐当前任务。
+
+```bash
+npx skills add hankunpeng/skills --skill yw
+```
+
 
 ---
 

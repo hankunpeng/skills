@@ -123,6 +123,14 @@ Run `$csc` to preview the active sessions in the current working directory’s `
 npx skills add hankunpeng/skills --skill csc
 ```
 
+### 17. In Your Own Words (`yw`)
+
+Use `$yw` or `/yw` to have the agent restate the problem, goal, and key boundaries in its own words and wait for confirmation before making changes. Pass a new request (`$yw Refactor token refresh…`) or run bare `$yw` to align on the discussion so far.
+
+```bash
+npx skills add hankunpeng/skills --skill yw
+```
+
 
 ---
 
