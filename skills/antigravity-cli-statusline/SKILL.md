@@ -16,7 +16,7 @@ This skill allows configuring, installing, or updating the custom status bar con
 - **Directory Emoji**: Prepend `📂` with home-abbreviated path (`~/...`).
 - **Token Quota Display**: Displays available 5H (5-hour) and 7D (weekly) remaining fraction percentages with dynamic color coding (Microsoft palette), automatically mapping standard Gemini models (`gemini-*`), Gemini 4 Argon / Orchestrator (`gemini-argon-wtu-weekly`), and third-party models (`3p-*`) while omitting unavailable windows.
 - **Live Refresh Countdown**: Displays live countdowns (`⏳ Xh Ym` / `⏳ Xd Yh` or `⌛ 0h Ym`) for reset times.
-- **Auto-Refresh**: Configures the status line to update every 60 seconds.
+- **Auto-Refresh**: Configures the status line to update every 30 seconds.
 
 ## Files Included
 

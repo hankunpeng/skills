@@ -19,7 +19,7 @@ echo "Updating settings.json..."
 if [ -f "$SETTINGS_FILE" ]; then
   # Use jq to update settings.json
   if command -v jq >/dev/null 2>&1; then
-    jq '.statusLine.type = "command" | .statusLine.command = "'"$STATUSLINE_DEST"'" | .statusLine.enabled = true | .statusLine.refreshInterval = 60' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
+    jq '.statusLine.type = "command" | .statusLine.command = "'"$STATUSLINE_DEST"'" | .statusLine.enabled = true | .statusLine.refreshInterval = 30' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
     mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
     echo "settings.json updated successfully."
   else
@@ -28,7 +28,7 @@ if [ -f "$SETTINGS_FILE" ]; then
     echo '    "type": "command",'
     echo "    \"command\": \"$STATUSLINE_DEST\","
     echo '    "enabled": true,'
-    echo '    "refreshInterval": 60'
+    echo '    "refreshInterval": 30'
     echo '  }'
   fi
 else
@@ -39,7 +39,7 @@ else
     "type": "command",
     "command": "$STATUSLINE_DEST",
     "enabled": true,
-    "refreshInterval": 60
+    "refreshInterval": 30
   }
 }
 EOF
