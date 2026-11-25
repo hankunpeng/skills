@@ -35,7 +35,7 @@ esac
 # 解析 5H 配额与刷新时间（仅当对应 bucket 存在时显示）
 has_5h_quota=$(echo "$JSON_INPUT" | jq -r "if (${bucket_5h_expr}) != null then 1 else 0 end")
 if [ "$has_5h_quota" -eq 1 ]; then
-  quota_5h_pct=$(echo "$JSON_INPUT" | jq -r "(${bucket_5h_expr}).remaining_fraction // 0 | . * 100 | round")
+  quota_5h_pct=$(echo "$JSON_INPUT" | jq -r "(${bucket_5h_expr}).remaining_fraction // 0 | . * 10000 | round / 100")
   quota_5h_reset_sec=$(echo "$JSON_INPUT" | jq -r "(${bucket_5h_expr}).reset_in_seconds // 0")
   if [ "$quota_5h_reset_sec" -gt 0 ]; then
     hours_5h=$((quota_5h_reset_sec / 3600))
@@ -60,7 +60,7 @@ fi
 # 解析 Weekly (7D) 配额与刷新时间（仅当对应 bucket 存在时显示）
 has_weekly_quota=$(echo "$JSON_INPUT" | jq -r "if (${bucket_weekly_expr}) != null then 1 else 0 end")
 if [ "$has_weekly_quota" -eq 1 ]; then
-  quota_weekly_pct=$(echo "$JSON_INPUT" | jq -r "(${bucket_weekly_expr}).remaining_fraction // 0 | . * 100 | round")
+  quota_weekly_pct=$(echo "$JSON_INPUT" | jq -r "(${bucket_weekly_expr}).remaining_fraction // 0 | . * 10000 | round / 100")
   quota_weekly_reset_sec=$(echo "$JSON_INPUT" | jq -r "(${bucket_weekly_expr}).reset_in_seconds // 0")
   if [ "$quota_weekly_reset_sec" -gt 0 ]; then
     weekly_days=$((quota_weekly_reset_sec / 86400))
@@ -124,18 +124,18 @@ else
 fi
 
 # 5H 余量颜色
-if [ "${quota_5h_pct:-100}" -le 30 ]; then
+if awk -v pct="${quota_5h_pct:-100}" 'BEGIN { exit !(pct <= 30) }'; then
   color_5h="$COLOR_MS_RED"
-elif [ "${quota_5h_pct:-100}" -le 60 ]; then
+elif awk -v pct="${quota_5h_pct:-100}" 'BEGIN { exit !(pct <= 60) }'; then
   color_5h="$COLOR_MS_YELLOW"
 else
   color_5h="$COLOR_MS_GREEN"
 fi
 
 # 7D 余量颜色
-if [ "${quota_weekly_pct:-100}" -le 30 ]; then
+if awk -v pct="${quota_weekly_pct:-100}" 'BEGIN { exit !(pct <= 30) }'; then
   color_weekly="$COLOR_MS_RED"
-elif [ "${quota_weekly_pct:-100}" -le 60 ]; then
+elif awk -v pct="${quota_weekly_pct:-100}" 'BEGIN { exit !(pct <= 60) }'; then
   color_weekly="$COLOR_MS_YELLOW"
 else
   color_weekly="$COLOR_MS_GREEN"
