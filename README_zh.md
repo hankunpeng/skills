@@ -57,8 +57,8 @@
   npx skills add hankunpeng/skills --skill svr
   ```
 
-### 8. 深入浅出英文通俗解释 (`eli5`)
-* **说明**：用通俗易懂的地道英文解释复杂主题，输出内置可玩微交互演示与秒懂自测题的清晰 HTML Artifact。
+### 8. 深入浅出通俗解释 (`eli5`)
+* **说明**：用零基础也能秒懂的地道语言解释复杂主题，输出内置可玩微交互演示与 1 道秒懂自测题的单文件 HTML Artifact。既可附带主题（如 `$eli5 注意力机制`），也可在讨论后单独发送 `$eli5` 解释上文机制；紧跟 ISO 639-1 两字母语言参数（如 `$eli5 -zh KV Cache` 或 `/eli5 -en`，其中 `zh` 默认简体中文、`en` 默认美国英语）可指定输出语言。
 * **安装**：
   ```bash
   npx skills add hankunpeng/skills --skill eli5
@@ -92,14 +92,7 @@
   npx skills add hankunpeng/skills --skill ccp
   ```
 
-### 13. 深入浅出中文通俗解释 (`eli5c`)
-* **说明**：用通俗易懂的地道中文解释复杂主题，输出内置可玩微交互演示与秒懂自测题的清晰 HTML Artifact。
-* **安装**：
-  ```bash
-  npx skills add hankunpeng/skills --skill eli5c
-  ```
-
-### 14. GitHub Flavored Markdown (`gfm`)
+### 13. GitHub Flavored Markdown (`gfm`)
 
 输入 `$gfm 写一份关于……的文档`，即可用 GitHub Flavored Markdown 撰写文档。
 
@@ -107,7 +100,7 @@
 npx skills add hankunpeng/skills --skill gfm
 ```
 
-### 15. Obsidian Flavored Markdown (`ofm`)
+### 14. Obsidian Flavored Markdown (`ofm`)
 
 用 `$ofm` 指定 Obsidian Flavored Markdown 格式，后面的自然语言决定具体动作。例如，`$ofm 总结上面的讨论` 会在对话中给出总结，`$ofm 把上面的讨论保存为 meeting-notes.md` 会写入文件。
 
@@ -115,7 +108,7 @@ npx skills add hankunpeng/skills --skill gfm
 npx skills add hankunpeng/skills --skill ofm
 ```
 
-### 16. Codex 会话清理 (`csc`)
+### 15. Codex 会话清理 (`csc`)
 
 输入 `$csc` 可预览当前工作目录 `/resume` 列表中的活动会话。输入 `$csc 删除当前目录中除当前会话外的其他活动会话` 可永久删除这些会话。需要 Python 3.8 或更新版本，以及支持 `thread/delete` 的本地 Codex CLI。
 
@@ -123,7 +116,7 @@ npx skills add hankunpeng/skills --skill ofm
 npx skills add hankunpeng/skills --skill csc
 ```
 
-### 17. 需求复述对齐 (`yw`)
+### 16. 需求复述对齐 (`yw`)
 
 输入 `$yw` 或 `/yw`，让 Agent 先用自己的话复述要解决的问题、期望目标与关键边界，并停下等待确认后再动手修改。既可以附带新需求（如 `$yw 重构登录态刷新逻辑`），也可以在讨论后单独发送 `$yw` 对齐当前任务；紧跟 ISO 639-1 两字母语言参数（如 `$yw -zh <英文 Issue>` 或 `/yw -en`，其中 `zh` 默认简体中文、`en` 默认美国英语）可指定输出语言。
 

@@ -58,7 +58,7 @@ This repository contains the following skills:
   ```
 
 ### 8. Explain Like I'm 5 (`eli5`)
-* **Description**: Explain complex topics in simple, intuitive English using clean HTML artifacts with playable micro-demos and a quick knowledge check.
+* **Description**: Explain complex topics in plain, intuitive prose using clean single-file HTML artifacts with playable micro-demos and a 1-question check. Pass a topic (`$eli5 Raft consensus`), run bare `$eli5` to explain the discussion so far, or add a leading ISO 639-1 language flag right after `$eli5` / `/eli5` (for example, `$eli5 -zh KV Cache` or `/eli5 -en`; `zh` defaults to Simplified Chinese and `en` to American English) to specify the output language.
 * **Installation**:
   ```bash
   npx skills add hankunpeng/skills --skill eli5
@@ -92,14 +92,7 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill ccp
   ```
 
-### 13. Explain Like I'm 5 in Chinese (`eli5c`)
-* **Description**: Explain complex topics in simple, idiomatic Chinese using clean HTML artifacts with playable micro-demos and a quick knowledge check.
-* **Installation**:
-  ```bash
-  npx skills add hankunpeng/skills --skill eli5c
-  ```
-
-### 14. GitHub Flavored Markdown (`gfm`)
+### 13. GitHub Flavored Markdown (`gfm`)
 
 Write a document in GitHub Flavored Markdown with `$gfm Write a document about…`.
 
@@ -107,7 +100,7 @@ Write a document in GitHub Flavored Markdown with `$gfm Write a document about�
 npx skills add hankunpeng/skills --skill gfm
 ```
 
-### 15. Obsidian Flavored Markdown (`ofm`)
+### 14. Obsidian Flavored Markdown (`ofm`)
 
 Use `$ofm` to select Obsidian Flavored Markdown, then say what to do. For example, `$ofm Summarize the discussion above` replies in chat, and `$ofm Save the discussion above as meeting-notes.md` writes a file.
 
@@ -115,7 +108,7 @@ Use `$ofm` to select Obsidian Flavored Markdown, then say what to do. For exampl
 npx skills add hankunpeng/skills --skill ofm
 ```
 
-### 16. Codex Session Cleanup (`csc`)
+### 15. Codex Session Cleanup (`csc`)
 
 Run `$csc` to preview the active sessions in the current working directory’s `/resume` list. Use `$csc Delete the other active sessions in this directory and keep this session` to permanently delete the other sessions. Requires Python 3.8 or later and a local Codex CLI with `thread/delete` support.
 
@@ -123,7 +116,7 @@ Run `$csc` to preview the active sessions in the current working directory’s `
 npx skills add hankunpeng/skills --skill csc
 ```
 
-### 17. In Your Own Words (`yw`)
+### 16. In Your Own Words (`yw`)
 
 Use `$yw` or `/yw` to have the agent restate the problem, goal, and key boundaries in its own words and wait for confirmation before making changes. Pass a new request (`$yw Refactor token refresh…`) or run bare `$yw` to align on the discussion so far; add an ISO 639-1 language flag right after `$yw` / `/yw` (for example, `$yw -zh <issue>` or `/yw -en`; `zh` defaults to Simplified Chinese and `en` to American English) to specify the output language.
 
