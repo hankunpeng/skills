@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# commit-lint.sh - Check the subject against ccp's Conventional Commits format.
+# commit-lint.sh - Lint a commit message against Conventional Commits spec.
 set -euo pipefail
 
 # Get message to lint
-if [ -n "${1:-}" ]; then
+if [ "$#" -gt 0 ]; then
   if [ -f "$1" ]; then
     MSG=$(cat < "$1")
   else
