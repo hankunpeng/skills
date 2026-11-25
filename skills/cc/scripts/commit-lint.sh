@@ -3,9 +3,9 @@
 set -euo pipefail
 
 # Get message to lint
-if [ -n "${1:-}" ]; then
+if [ "$#" -gt 0 ]; then
   if [ -f "$1" ]; then
-    MSG=$(cat "$1")
+    MSG=$(cat < "$1")
   else
     MSG="$1"
   fi
@@ -15,24 +15,24 @@ else
 fi
 
 # Extract first line and trim leading/trailing whitespace
-FIRST_LINE=$(echo "$MSG" | head -n 1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+FIRST_LINE=$(printf '%s\n' "${MSG%%$'\n'*}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
 if [ -z "$FIRST_LINE" ]; then
   echo "Error: Empty commit message."
   exit 1
 fi
 
-# Regex pattern for conventional commit message header
-# Types: init, feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
-PATTERN="^(init|feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9._/-]+\))?!?: .+$"
+# Keep the default type list in one place for validation and diagnostics.
+TYPES='init|feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert'
+PATTERN="^($TYPES)(\([a-zA-Z0-9._/-]+\))?!?: .+$"
 
 if [[ "$FIRST_LINE" =~ $PATTERN ]]; then
   echo "✔ Commit message style is valid!"
   exit 0
 else
   echo "✗ Invalid commit message format."
-  echo "Expected: <type>[optional scope]: <description>"
-  echo "Types: init, feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+  echo "Expected: <type>[optional scope][optional !]: <description>"
+  echo "Types: ${TYPES//|/, }"
   echo "Example: feat(auth): add google sign-in"
   exit 1
 fi
