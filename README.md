@@ -64,11 +64,11 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill eli5
   ```
 
-### 9. URL to Markdown (`url-to-markdown`)
-* **Description**: Fetch any URL and convert it to clean Markdown or structured JSON using Chrome CDP with site-specific adapters (X/Twitter, YouTube transcripts, Hacker News threads, and generic web pages via Defuddle), supporting interactive login/CAPTCHA wait modes and local media downloading.
+### 9. Web Clipper (`clip`)
+* **Description**: Fetch any URL and convert it to clean, ad-free Markdown or structured JSON using Chrome CDP with multi-layer ad blocking enabled by default (network-level ad domain blocking, DOM/Shadow-DOM widget purification, and semantic heading normalization) and site-specific adapters (X/Twitter, YouTube transcripts, Hacker News threads, and generic web pages via Defuddle). Supports `-g` (GFM alerts + standard links) and `-o` (OFM single-line callouts + `![[...]]` local embeds), automatically enabling OFM inside `.obsidian/` vaults and defaulting to GFM elsewhere.
 * **Installation**:
   ```bash
-  npx skills add hankunpeng/skills --skill url-to-markdown
+  npx skills add hankunpeng/skills --skill clip
   ```
 
 ### 10. Playwright Use System Chrome (`playwright-use-chrome`)
@@ -78,21 +78,14 @@ This repository contains the following skills:
   npx skills add hankunpeng/skills --skill playwright-use-chrome
   ```
 
-### 11. URL to Obsidian (`url-to-obsidian`)
-* **Description**: Fetch any URL and convert it to clean, ad-free Obsidian Markdown or structured JSON using Chrome CDP with network-level ad blocking, DOM/Shadow-DOM ad widget purification, semantic heading normalization, and native Obsidian Callout (`> [!TYPE] Title`) conversion.
-* **Installation**:
-  ```bash
-  npx skills add hankunpeng/skills --skill url-to-obsidian
-  ```
-
-### 12. Conventional Commit and Push (`ccp`)
+### 11. Conventional Commit and Push (`ccp`)
 * **Description**: Context-aware Commit And Push workflow. Automatically stages specified or recently modified target files along with their referenced companion assets (e.g., blog post images in `assets/img/posts/<slug>/`), validates the commit message against Conventional Commits, commits, and pushes to remote while isolating unrelated changes.
 * **Installation**:
   ```bash
   npx skills add hankunpeng/skills --skill ccp
   ```
 
-### 13. GitHub Flavored Markdown (`gfm`)
+### 12. GitHub Flavored Markdown (`gfm`)
 
 Write a document in GitHub Flavored Markdown with `$gfm Write a document about…`.
 
@@ -100,7 +93,7 @@ Write a document in GitHub Flavored Markdown with `$gfm Write a document about�
 npx skills add hankunpeng/skills --skill gfm
 ```
 
-### 14. Obsidian Flavored Markdown (`ofm`)
+### 13. Obsidian Flavored Markdown (`ofm`)
 
 Use `$ofm` to select Obsidian Flavored Markdown, then say what to do. For example, `$ofm Summarize the discussion above` replies in chat, and `$ofm Save the discussion above as meeting-notes.md` writes a file.
 
@@ -108,7 +101,7 @@ Use `$ofm` to select Obsidian Flavored Markdown, then say what to do. For exampl
 npx skills add hankunpeng/skills --skill ofm
 ```
 
-### 15. Codex Session Cleanup (`csc`)
+### 14. Codex Session Cleanup (`csc`)
 
 Run `$csc` to preview the active sessions in the current working directory’s `/resume` list. Use `$csc Delete the other active sessions in this directory and keep this session` to permanently delete the other sessions. Requires Python 3.8 or later and a local Codex CLI with `thread/delete` support.
 
@@ -116,7 +109,7 @@ Run `$csc` to preview the active sessions in the current working directory’s `
 npx skills add hankunpeng/skills --skill csc
 ```
 
-### 16. In Your Own Words (`yw`)
+### 15. In Your Own Words (`yw`)
 
 Use `$yw` or `/yw` to have the agent restate the problem, goal, and key boundaries in its own words and wait for confirmation before making changes. Pass a new request (`$yw Refactor token refresh…`) or run bare `$yw` to align on the discussion so far; add an ISO 639-1 language flag right after `$yw` / `/yw` (for example, `$yw -zh <issue>` or `/yw -en`; `zh` defaults to Simplified Chinese and `en` to American English) to specify the output language.
 
