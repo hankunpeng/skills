@@ -117,6 +117,13 @@ Run `$csc` to preview the active sessions in the current working directory’s `
 npx skills add hankunpeng/skills --skill csc
 ```
 
+### 16. Project Initialization (`project-init`)
+* **Description**: Idempotently initialize a project directory for AI agent collaboration: creates `.agents/skills/`, scaffolds `AGENTS.md` with a starter heading template if missing, and ensures `.gitignore` exists with deduplicated `# OS files` (`.DS_Store`) and `# AI files` (`.agents/`, `.claude/`, `.gemini/`, `.*buddy/`) rules.
+* **Installation**:
+  ```bash
+  npx skills add hankunpeng/skills --skill project-init
+  ```
+
 
 ---
 

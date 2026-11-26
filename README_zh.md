@@ -117,6 +117,13 @@ npx skills add hankunpeng/skills --skill yw
 npx skills add hankunpeng/skills --skill csc
 ```
 
+### 16. 项目初始化 (`project-init`)
+* **说明**：幂等初始化项目的 AI Agent 协作环境：自动检查并补建 `.agents/skills/` 目录，在缺少 `AGENTS.md` 时生成带基础标题模板的文件，并按单行去重策略确保 `.gitignore` 包含 `# OS files`（`.DS_Store`）与 `# AI files`（`.agents/`、`.claude/`、`.gemini/`、`.*buddy/`）忽略规则。
+* **安装**：
+  ```bash
+  npx skills add hankunpeng/skills --skill project-init
+  ```
+
 
 ---
 
